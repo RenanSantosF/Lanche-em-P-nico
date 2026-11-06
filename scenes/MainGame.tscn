@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://c83k5n89xy1qm"]
+
+[ext_resource type="Script" path="res://scenes/MainGame.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://dfy38u28s19km" path="res://scenes/Counter/Counter.tscn" id="2_cnt"]
+[ext_resource type="Script" path="res://scripts/BurgerAssembly.gd" id="3_asm"]
+[ext_resource type="Script" path="res://scripts/QueueManager.gd" id="4_que"]
+[ext_resource type="PackedScene" uid="uid://cb30127814xka" path="res://scenes/UI/GameUI.tscn" id="5_ui"]
+[ext_resource type="PackedScene" uid="uid://bv51r8s2plqex" path="res://scenes/UI/UpgradeStore.tscn" id="6_sto"]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.18, 0.16, 0.15, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.9, 0.88, 0.85, 1)
+ambient_light_energy = 1.0
+
+[node name="MainGame" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 2, 5, 3)
+light_energy = 0.9
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.766044, 0.642788, 0, -0.642788, 0.766044, 0, 2.6, 2.3)
+fov = 58.0
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Counter" parent="World" instance=ExtResource("2_cnt")]
+
+[node name="BurgerAssembly" type="Node3D" parent="World/Counter/AssemblyStation"]
+script = ExtResource("3_asm")
+plate_path = NodePath("../PlateMarker")
+
+[node name="QueueManager" type="Node3D" parent="World"]
+script = ExtResource("4_que")
+
+[node name="UIOverlay" type="CanvasLayer" parent="."]
+
+[node name="GameUI" parent="UIOverlay" instance=ExtResource("5_ui")]
+
+[node name="UpgradeStore" parent="UIOverlay" instance=ExtResource("6_sto")]
+visible = false

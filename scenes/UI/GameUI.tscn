@@ -1,0 +1,281 @@
+[gd_scene load_steps=2 format=3 uid="uid://cb30127814xka"]
+
+[ext_resource type="Script" path="res://scenes/UI/GameUI.gd" id="1_gui"]
+
+[node name="GameUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_gui")
+
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 70.0
+grow_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TopBar/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="CoinsBox" type="HBoxContainer" parent="TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="CoinsLabel" type="Label" parent="TopBar/MarginContainer/HBoxContainer/CoinsBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "🪙 100"
+
+[node name="TimerBox" type="HBoxContainer" parent="TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="TimerLabel" type="Label" parent="TopBar/MarginContainer/HBoxContainer/TimerBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "⏱️ 02:30"
+
+[node name="ScoreBox" type="HBoxContainer" parent="TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="ScoreLabel" type="Label" parent="TopBar/MarginContainer/HBoxContainer/ScoreBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "⭐ 0"
+
+[node name="StoreBtn" type="Button" parent="TopBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(80, 44)
+layout_mode = 2
+text = "🛒 Loja"
+
+[node name="OrderArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 75.0
+offset_bottom = 220.0
+grow_horizontal = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="OrderArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+vertical_scroll_mode = 0
+
+[node name="CardsContainer" type="HBoxContainer" parent="OrderArea/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="EquipmentBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -290.0
+offset_right = -20.0
+offset_bottom = -225.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="GrillBtn" type="Button" parent="EquipmentBar"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🥩 Chapa (Carne)"
+
+[node name="FryerBtn" type="Button" parent="EquipmentBar"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🍟 Fritar Batata"
+
+[node name="SodaBtn" type="Button" parent="EquipmentBar"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🥤 Refrigerante"
+
+[node name="IngredientDock" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -215.0
+offset_right = -16.0
+offset_bottom = -90.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Grid" type="GridContainer" parent="IngredientDock"]
+layout_mode = 2
+columns = 3
+
+[node name="BunBottomBtn" type="Button" parent="IngredientDock/Grid"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🍞 Pão Base"
+
+[node name="CheeseBtn" type="Button" parent="IngredientDock/Grid"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🧀 Queijo"
+
+[node name="LettuceBtn" type="Button" parent="IngredientDock/Grid"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🥬 Alface"
+
+[node name="TomatoBtn" type="Button" parent="IngredientDock/Grid"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🍅 Tomate"
+
+[node name="SauceBtn" type="Button" parent="IngredientDock/Grid"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🥫 Molho"
+
+[node name="BunTopBtn" type="Button" parent="IngredientDock/Grid"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🍔 Pão Topo"
+
+[node name="ControlBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 20
+
+[node name="TrashBtn" type="Button" parent="ControlBar"]
+custom_minimum_size = Vector2(160, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🗑️ Descartar"
+
+[node name="DeliverBtn" type="Button" parent="ControlBar"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "🔔 ENTREGAR PEDIDO"
+
+[node name="FeedbackBanner" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 28
+text = "Perfeito!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResultsModal" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -240.0
+offset_right = 300.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ResultsModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="ResultsModal/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "FASE CONCLUÍDA!"
+horizontal_alignment = 1
+
+[node name="StarsLabel" type="Label" parent="ResultsModal/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "⭐⭐⭐"
+horizontal_alignment = 1
+
+[node name="DescLabel" type="Label" parent="ResultsModal/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Pontuação: 500\nMoedas: +120"
+horizontal_alignment = 1
+
+[node name="NextBtn" type="Button" parent="ResultsModal/VBoxContainer"]
+custom_minimum_size = Vector2(260, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Próxima Fase ➡️"
+
+[node name="RetryBtn" type="Button" parent="ResultsModal/VBoxContainer"]
+custom_minimum_size = Vector2(260, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "🔄 Jogar Novamente"
+
+[node name="DoubleCoinsBtn" type="Button" parent="ResultsModal/VBoxContainer"]
+custom_minimum_size = Vector2(260, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "🎬 Dobrar Moedas (Vídeo)"
