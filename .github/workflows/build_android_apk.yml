@@ -84,6 +84,11 @@ jobs:
           ls -lh build/
           test -f build/lanche_em_panico.apk
 
+      - name: Verify APK signature
+        run: |
+          APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | sort -V | tail -1)
+          $APKSIGNER verify --verbose --print-certs build/lanche_em_panico.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
