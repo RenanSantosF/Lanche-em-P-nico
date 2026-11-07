@@ -69,7 +69,6 @@ jobs:
           timeout 300 godot --headless --editor --quit || true
 
       - name: Run Headless Automated Tests
-        continue-on-error: true
         run: |
           timeout 120 godot --headless -s tests/test_game_logic.gd
 

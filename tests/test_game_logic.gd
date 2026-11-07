@@ -1,132 +1,59 @@
 extends SceneTree
+# Testes headless das regras do jogo: godot --headless -s tests/test_game_logic.gd
 
-# test_game_logic.gd - Comprehensive automated test suite for headless test verification.
+const R = preload("res://scripts/Rules.gd")
 
-const LM = preload("res://scripts/LevelManager.gd")
-const BM = preload("res://scripts/BurgerModels.gd")
-const RecipesScript = preload("res://autoload/Recipes.gd")
-const SaveManagerScript = preload("res://autoload/SaveManager.gd")
-const AdManagerScript = preload("res://autoload/AdManager.gd")
+var failures := 0
+
+
+func check(cond: bool, msg: String) -> void:
+	if cond:
+		print("  ok  - ", msg)
+	else:
+		failures += 1
+		printerr("  FALHOU - ", msg)
+
 
 func _init() -> void:
-	print("--- INICIANDO TESTES DO LANCHE EM PÂNICO ---")
+	print("--- Testes Lanche em Pânico ---")
+	var xb := [R.BUN_BOTTOM, R.PATTY, R.CHEESE, R.BUN_TOP]
 
-	test_recipes_and_validation()
-	test_level_progression()
-	test_save_manager()
-	test_ad_manager_rules()
-	test_models_instantiation()
+	check(R.grade(xb, xb, [], []) == 3, "lanche perfeito = 3 estrelas")
+	check(R.grade(xb, [R.BUN_BOTTOM, R.PATTY, R.BUN_TOP], [], []) == 2, "faltou 1 ingrediente = 2 estrelas")
+	check(R.grade(xb, [R.BUN_BOTTOM, R.CHEESE, R.PATTY, R.BUN_TOP], [], []) == 1, "ordem trocada = 1 estrela")
+	check(R.grade(xb, [R.BUN_BOTTOM, R.LETTUCE, R.LETTUCE, R.LETTUCE, R.LETTUCE], [], []) == 0, "tudo errado = 0 estrelas")
+	check(R.grade(xb, xb, [R.FRIES], []) == 2, "esqueceu a batata = 2 estrelas")
+	check(R.grade(xb, xb, [R.FRIES, R.SODA], [R.SODA, R.FRIES]) == 3, "acompanhamentos certos = 3 estrelas")
+	check(R.mistakes([], []) == 0, "distância vazia")
 
-	print("--- TODOS OS TESTES PASSARAM COM SUCESSO! ---")
-	quit(0)
+	var start := R.available_recipes({}, 1)
+	check(start.size() >= 2, "dia 1 tem lanches disponíveis")
+	for r in start:
+		for l in r["layers"]:
+			check(R.START_INGREDIENTS.has(l), "%s usa só ingredientes iniciais" % r["name"])
+	for r in R.MENU:
+		check(r["layers"][0] == R.BUN_BOTTOM and r["layers"][-1] == R.BUN_TOP, "%s começa e termina com pão" % r["name"])
 
-func test_recipes_and_validation() -> void:
-	print("[TEST] Validando Catálogo e Regras de Receitas...")
-	var recipes_inst = RecipesScript.new()
-	var recipes = recipes_inst.RECIPES
-	assert(recipes.size() >= 5, "Deve haver pelo menos 5 receitas configuradas")
+	var all_owned := {}
+	for u in R.UPGRADES:
+		all_owned[u["id"]] = true
+	check(R.available_recipes(all_owned, 20).size() == R.MENU.size(), "tudo comprado libera o cardápio inteiro")
+	check(R.seat_count({}) == 2 and R.seat_count(all_owned) == 4, "bancos 2 -> 4")
+	check(R.unlocked_sides(all_owned).size() == 2, "batata e refri liberados")
 
-	var classic = recipes[0]
-	assert(classic["id"] == "classic_burger")
+	var p3 := R.payout(10, 3, 0.9)
+	var p1 := R.payout(10, 1, 0.9)
+	check(p3["coins"] == 10 and p3["tip"] > 0, "3 estrelas paga tudo + gorjeta")
+	check(p1["coins"] < p3["coins"] and p1["tip"] == 0, "1 estrela paga menos")
+	check(R.payout(10, 0, 1.0)["coins"] == 0, "0 estrelas não paga")
+	check(R.spawn_interval(10, 2) < R.spawn_interval(1, 2), "fila acelera com os dias")
 
-	# Test exact valid burger
-	var layers_ok = [
-		RecipesScript.IngredientType.BUN_BOTTOM,
-		RecipesScript.IngredientType.PATTY,
-		RecipesScript.IngredientType.CHEESE,
-		RecipesScript.IngredientType.LETTUCE,
-		RecipesScript.IngredientType.BUN_TOP
-	]
-	var res_ok = recipes_inst.validate_order(classic, layers_ok, false, false)
-	assert(res_ok["is_perfect"] == true, "Validação de receita clássica correta falhou")
+	for u in R.UPGRADES:
+		check(not R.upgrade_by_id(u["id"]).is_empty(), "upgrade %s encontrado" % u["id"])
 
-	# Test wrong layer order
-	var layers_wrong = [
-		RecipesScript.IngredientType.BUN_BOTTOM,
-		RecipesScript.IngredientType.CHEESE,
-		RecipesScript.IngredientType.PATTY,
-		RecipesScript.IngredientType.LETTUCE,
-		RecipesScript.IngredientType.BUN_TOP
-	]
-	var res_wrong = recipes_inst.validate_order(classic, layers_wrong, false, false)
-	assert(res_wrong["is_perfect"] == false, "Validação permitiu ingredientes fora de ordem")
-
-	# Test missing side
-	var combo = recipes[3] # combo_classic requires fries and soda
-	assert(combo["has_fries"] == true and combo["has_soda"] == true)
-	var res_no_sides = recipes_inst.validate_order(combo, combo["ingredients"], false, false)
-	assert(res_no_sides["is_acceptable"] == false, "Combo foi aceito sem acompanhamentos obrigatórios")
-
-	var res_full_combo = recipes_inst.validate_order(combo, combo["ingredients"], true, true)
-	assert(res_full_combo["is_perfect"] == true, "Combo completo falhou")
-	recipes_inst.free()
-	print("  -> Receitas e Validações OK!")
-
-func test_level_progression() -> void:
-	print("[TEST] Validando Progressão de Fases e Metas...")
-	assert(LM.STAGES.size() == 10, "Devem existir 10 fases configuradas")
-
-	for i in range(1, 11):
-		var cfg = LM.get_stage_config(i)
-		assert(cfg["stage_num"] == i)
-		assert(cfg["duration"] >= 120.0 and cfg["duration"] <= 180.0, "Fase fora do tempo de 2 a 3 minutos: " + str(cfg["duration"]))
-		assert(cfg["target_score"] > 0)
-		assert(cfg["target_customers"] > 0)
-
-	# Check stars threshold logic
-	assert(LM.calculate_stars(1, 50) == 0)
-	assert(LM.calculate_stars(1, 130) == 1)
-	assert(LM.calculate_stars(1, 190) == 2)
-	assert(LM.calculate_stars(1, 300) == 3)
-	print("  -> Fases e Estrelas OK!")
-
-func test_save_manager() -> void:
-	print("[TEST] Validando SaveManager e Economia...")
-	var sm = SaveManagerScript.new()
-	sm.reset_progress()
-	assert(sm.get_coins() == 100)
-
-	sm.add_coins(50)
-	assert(sm.get_coins() == 150)
-
-	var spent = sm.spend_coins(80)
-	assert(spent == true)
-	assert(sm.get_coins() == 70)
-
-	var spent_fail = sm.spend_coins(1000)
-	assert(spent_fail == false)
-	assert(sm.get_coins() == 70)
-
-	sm.set_upgrade_level("fast_grill", 2)
-	assert(sm.get_upgrade_level("fast_grill") == 2)
-
-	sm.record_level_result(1, 3, 250)
-	assert(sm.get_level_stars(1) == 3)
-	assert(sm.player_data["unlocked_level"] == 2)
-	sm.free()
-	print("  -> SaveManager e Progresso OK!")
-
-func test_ad_manager_rules() -> void:
-	print("[TEST] Validando Políticas de Anúncios AdMob...")
-	var adm = AdManagerScript.new()
-	# Ad must NEVER show during active gameplay
-	adm.set_gameplay_active(true)
-	assert(adm.can_show_interstitial() == false, "Intersticial não pode ser exibido durante partida ativa!")
-
-	adm.set_gameplay_active(false)
-	# Check 3 minute safe cooldown
-	adm.last_interstitial_time = Time.get_ticks_msec() / 1000.0 - 50.0 # Only 50s ago
-	assert(adm.can_show_interstitial() == false, "Intersticial exibido antes do intervalo de 3 minutos!")
-
-	adm.last_interstitial_time = Time.get_ticks_msec() / 1000.0 - 200.0 # 200s ago (> 180s)
-	assert(adm.can_show_interstitial() == true, "Intersticial deveria estar liberado após 3 minutos")
-	adm.free()
-	print("  -> Regras do AdManager OK!")
-
-func test_models_instantiation() -> void:
-	print("[TEST] Validando Instanciação de Modelos 3D...")
-	for type in RecipesScript.IngredientType.values():
-		var node = BM.create_ingredient_node(type)
-		assert(node != null)
-		node.free()
-	print("  -> Modelos 3D OK!")
+	if failures == 0:
+		print("--- TODOS OS TESTES PASSARAM ---")
+		quit(0)
+	else:
+		printerr("--- %d TESTE(S) FALHARAM ---" % failures)
+		quit(1)
