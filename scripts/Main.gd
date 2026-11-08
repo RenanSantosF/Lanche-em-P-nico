@@ -110,6 +110,16 @@ var tile_cols: int = 4
 var _menu_t: float = 0.0
 var _menu_acc: float = 0.0
 var _build_id: int = 0
+var _last_action: Dictionary = {}
+
+
+# Proteção contra o mesmo toque chegar duas vezes (nenhum humano toca 2x em menos de 60 ms).
+func _dup(key: String) -> bool:
+	var now := Time.get_ticks_msec()
+	if now - int(_last_action.get(key, -100000)) < 60:
+		return true
+	_last_action[key] = now
+	return false
 
 
 func _ready() -> void:
@@ -810,6 +820,8 @@ func _on_video_coins() -> void:
 func _buy(id: String) -> void:
 	if shop_scroll and shop_scroll.dragged:
 		return
+	if _dup("buy"):
+		return
 	if Game.buy(id):
 		Sfx.play("buy")
 		_burst_confetti(Vector2(size.x / 2, size.y / 2))
@@ -819,6 +831,7 @@ func _buy(id: String) -> void:
 
 # ------------------------------------------------------------------ dia
 func _start_day() -> void:
+	print("[LP] começando dia %d" % Game.day)
 	_hide_overlays()
 	menu_screen.visible = false
 	game_root.visible = true
@@ -1052,6 +1065,9 @@ func _tile_center(item: int) -> Vector2:
 func _on_tile(item: int) -> void:
 	if state != PLAY and state != CLOSING:
 		return
+	if _dup("tile%d" % item):
+		print("[LP] toque duplicado ignorado: tile %d" % item)
+		return
 	if item == R.PATTY:
 		if grill.add_raw():
 			Sfx.play("sizzle")
@@ -1126,6 +1142,8 @@ func _landed(snap: Array, bid: int) -> void:
 
 func _on_grill_tap(i: int) -> void:
 	if state != PLAY and state != CLOSING:
+		return
+	if _dup("grill%d" % i):
 		return
 	match grill.state_of(i):
 		"empty":
@@ -1204,6 +1222,8 @@ func _update_hints() -> void:
 
 
 func _on_trash() -> void:
+	if _dup("trash"):
+		return
 	if built.is_empty() and built_sides.is_empty():
 		return
 	built = []
@@ -1221,6 +1241,8 @@ func _break_combo() -> void:
 
 
 func _on_deliver() -> void:
+	if _dup("deliver"):
+		return
 	if built.is_empty():
 		return
 	if selected == null or not is_instance_valid(selected) or selected.mood != "wait":

@@ -129,7 +129,8 @@ func _update_glow() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	# toque (celular) ou clique (PC); o mouse emulado do toque está desligado no projeto
+	if ((event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT) or event is InputEventScreenTouch) and event.pressed:
 		tapped.emit(self)
 		accept_event()
 

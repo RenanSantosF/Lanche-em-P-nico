@@ -34,7 +34,8 @@ func _ready() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and t > 0.8:
+	var press: bool = (event is InputEventMouseButton or event is InputEventScreenTouch) and event.pressed
+	if press and t > 0.8:
 		t = maxf(t, DURATION - 0.35)
 
 

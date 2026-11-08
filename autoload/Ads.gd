@@ -33,6 +33,7 @@ var _after_inter: Callable
 
 func _ready() -> void:
 	enabled = OS.get_name() == "Android" and Engine.has_singleton("PoingGodotAdMob")
+	print("[LP] Ads enabled=%s test_ads=%s" % [enabled, use_test_ads()])
 	if enabled:
 		_request_consent()
 
@@ -96,6 +97,7 @@ func _init_sdk() -> void:
 	MobileAds.set_request_configuration(cfg)
 	var listener := OnInitializationCompleteListener.new()
 	listener.on_initialization_complete = func(_s) -> void:
+		print("[LP] Ads SDK inicializado")
 		_load_interstitial()
 		_load_rewarded()
 	MobileAds.initialize(listener)
@@ -109,6 +111,7 @@ func _load_interstitial() -> void:
 	var cb := InterstitialAdLoadCallback.new()
 	cb.on_ad_loaded = func(ad) -> void:
 		_loading_inter = false
+		print("[LP] Ads intersticial carregado")
 		_interstitial = ad
 		var fs := FullScreenContentCallback.new()
 		fs.on_ad_dismissed_full_screen_content = func() -> void:
@@ -118,7 +121,8 @@ func _load_interstitial() -> void:
 			_destroy_inter()
 			_finish_inter()
 		ad.full_screen_content_callback = fs
-	cb.on_ad_failed_to_load = func(_e) -> void:
+	cb.on_ad_failed_to_load = func(e) -> void:
+		print("[LP] Ads intersticial falhou: ", e.message if e else "?")
 		_loading_inter = false
 		get_tree().create_timer(30.0).timeout.connect(_load_interstitial)
 	InterstitialAdLoader.new().load(_inter_id(), AdRequest.new(), cb)
@@ -170,6 +174,7 @@ func _load_rewarded() -> void:
 	var cb := RewardedAdLoadCallback.new()
 	cb.on_ad_loaded = func(ad) -> void:
 		_loading_reward = false
+		print("[LP] Ads premiado carregado")
 		_rewarded = ad
 		var fs := FullScreenContentCallback.new()
 		fs.on_ad_dismissed_full_screen_content = func() -> void:
@@ -178,7 +183,8 @@ func _load_rewarded() -> void:
 			_end_rewarded()
 		ad.full_screen_content_callback = fs
 		rewarded_ready_changed.emit(true)
-	cb.on_ad_failed_to_load = func(_e) -> void:
+	cb.on_ad_failed_to_load = func(e) -> void:
+		print("[LP] Ads premiado falhou: ", e.message if e else "?")
 		_loading_reward = false
 		get_tree().create_timer(30.0).timeout.connect(_load_rewarded)
 	RewardedAdLoader.new().load(_reward_id(), AdRequest.new(), cb)

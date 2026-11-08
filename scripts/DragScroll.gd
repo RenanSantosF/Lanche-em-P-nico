@@ -17,7 +17,11 @@ var _pos: float = 0.0
 func _input(event: InputEvent) -> void:
 	if not is_visible_in_tree():
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+	# aceita toque (celular) e mouse (PC); só o primeiro dedo rola a lista
+	var is_btn: bool = (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT) \
+		or (event is InputEventScreenTouch and event.index == 0)
+	var is_move: bool = event is InputEventMouseMotion or (event is InputEventScreenDrag and event.index == 0)
+	if is_btn:
 		if event.pressed:
 			if get_global_rect().has_point(event.position):
 				_tracking = true
@@ -30,7 +34,7 @@ func _input(event: InputEvent) -> void:
 				_pos = scroll_vertical
 		else:
 			_tracking = false
-	elif event is InputEventMouseMotion and _tracking:
+	elif is_move and _tracking:
 		var dy: float = event.position.y - _start_y
 		if not dragged and absf(dy) > DRAG_START:
 			dragged = true
