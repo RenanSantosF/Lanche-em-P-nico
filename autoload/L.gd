@@ -70,6 +70,8 @@ const EN := {
 	"Toque para jogar": "Tap to play",
 	"VÍDEO: DOBRAR MOEDAS (+%d)": "VIDEO: DOUBLE COINS (+%d)", "MOEDAS DOBRADAS! +%d": "COINS DOUBLED! +%d",
 	"Moedas grátis! Assista um vídeo e ganhe %d moedas.": "Free coins! Watch a video and get %d coins.",
+	"Prato vazio! O cliente ficou bravo.": "Empty plate! The customer got mad.",
+	"Lanche aberto, sem o pão de cima! -2 estrelas": "Open burger, no top bun! -2 stars",
 	"ASSISTIR": "WATCH", "Daqui a pouco": "Soon", "Privacidade dos anúncios": "Ad privacy",
 }
 
@@ -139,6 +141,8 @@ const ES := {
 	"Toque para jogar": "Toca para jugar",
 	"VÍDEO: DOBRAR MOEDAS (+%d)": "VIDEO: DUPLICAR MONEDAS (+%d)", "MOEDAS DOBRADAS! +%d": "¡MONEDAS DUPLICADAS! +%d",
 	"Moedas grátis! Assista um vídeo e ganhe %d moedas.": "¡Monedas gratis! Mira un video y gana %d monedas.",
+	"Prato vazio! O cliente ficou bravo.": "¡Plato vacío! El cliente se enojó.",
+	"Lanche aberto, sem o pão de cima! -2 estrelas": "¡Hamburguesa abierta, sin el pan de arriba! -2 estrellas",
 	"ASSISTIR": "VER", "Daqui a pouco": "En un rato", "Privacidade dos anúncios": "Privacidad de anuncios",
 }
 

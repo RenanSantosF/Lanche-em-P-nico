@@ -21,6 +21,9 @@ func _init() -> void:
 	# notas
 	check(R.grade(xb, xb, [], []) == 3, "lanche perfeito = 3 estrelas")
 	check(R.grade(xb, [R.BUN_BOTTOM, R.PATTY, R.BUN_TOP], [], []) == 2, "faltou 1 ingrediente = 2 estrelas")
+	check(R.grade(xb, [R.BUN_BOTTOM, R.PATTY, R.CHEESE], [], []) == 1, "sem o pão de cima = perde 2 estrelas")
+	check(R.grade(xb, [R.BUN_BOTTOM, R.PATTY], [], []) == 0, "sem pão de cima e faltando cheddar = 0")
+	check(R.grade(xb, [], [], []) == 0, "prato vazio = 0 estrelas")
 	check(R.grade(xb, [R.BUN_BOTTOM, R.CHEESE, R.PATTY, R.BUN_TOP], [], []) == 1, "ordem trocada = 1 estrela")
 	check(R.grade(xb, [R.BUN_BOTTOM, R.LETTUCE, R.LETTUCE, R.LETTUCE, R.LETTUCE], [], []) == 0, "tudo errado = 0")
 	check(R.grade(xb, xb, [R.FRIES], []) == 2, "esqueceu a batata = 2 estrelas")

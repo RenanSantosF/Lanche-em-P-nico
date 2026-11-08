@@ -1223,7 +1223,8 @@ func _refresh_build(update_plate: bool = true) -> void:
 		ticket.show_order(selected.recipe, selected.sides, built, built_sides)
 	else:
 		ticket.show_order({}, [], built, built_sides)
-	btn_deliver.disabled = built.is_empty()
+	# sempre dá pra entregar (mesmo errado ou incompleto) — a nota é que cai
+	btn_deliver.disabled = false
 	_update_hints()
 
 
@@ -1271,8 +1272,6 @@ func _break_combo() -> void:
 func _on_deliver() -> void:
 	if _dup("deliver"):
 		return
-	if built.is_empty():
-		return
 	if selected == null or not is_instance_valid(selected) or selected.mood != "wait":
 		_auto_select()
 		if selected == null:
@@ -1280,6 +1279,10 @@ func _on_deliver() -> void:
 			return
 	var c = selected
 	var stars := R.grade(c.recipe["layers"], built, c.sides, built_sides)
+	if built.is_empty():
+		_show_banner("Prato vazio! O cliente ficou bravo.", 1.6)
+	elif built[-1] != R.BUN_TOP:
+		_show_banner("Lanche aberto, sem o pão de cima! -2 estrelas", 1.6)
 	if stars == 3:
 		stats["combo"] += 1
 	else:

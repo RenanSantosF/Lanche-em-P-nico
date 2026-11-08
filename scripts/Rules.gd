@@ -315,8 +315,16 @@ static func side_mistakes(wanted: Array, built: Array) -> int:
 
 
 # 3 estrelas = perfeito; cada erro tira uma estrela.
+# Dá para entregar de qualquer jeito, mas lanche aberto (sem o pão de cima) ou sem o pão
+# de baixo é falha grave: custa 2 estrelas em vez de 1. Prato vazio = 0 estrelas.
 static func grade(wanted: Array, built: Array, wanted_sides: Array, built_sides: Array) -> int:
+	if built.is_empty():
+		return 0
 	var errors := mistakes(wanted, built) + side_mistakes(wanted_sides, built_sides)
+	if built[-1] != BUN_TOP:
+		errors += 1
+	if built[0] != BUN_BOTTOM:
+		errors += 1
 	return clampi(3 - errors, 0, 3)
 
 
