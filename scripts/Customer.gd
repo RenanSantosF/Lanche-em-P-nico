@@ -8,6 +8,7 @@ const Baked = preload("res://scripts/Baked.gd")
 
 signal tapped(customer)
 signal ran_out(customer)
+signal yelled(customer, level)  # cliente gritou (1 = impaciente, 2 = furioso)
 
 const SKINS := [Color("ffd9b8"), Color("f1c08f"), Color("d79a6a"), Color("a86b45"), Color("7a4a2e")]
 const SHIRTS := [Color("ff6b6b"), Color("4dabf7"), Color("51cf66"), Color("fcc419"), Color("cc5de8"), Color("ff922b"), Color("20c997")]
@@ -56,11 +57,16 @@ var body
 var bubble
 var bar: Part
 var glow: Part
+var lids: Part
+var _eyes: Array = []      # posições dos olhos (calculadas ao assar o corpo)
+var _eye_r: float = 8.0
+var _lid_col: Color = Color.WHITE
 var _glow_tw: Tween
 var _t: float = 0.0
 var _blink: float = 2.0
 var _blinking: bool = false
 var _angry: bool = false
+var _yell2: bool = false
 var _bar_drawn: float = -1.0
 
 
@@ -86,6 +92,7 @@ func setup(rec: Dictionary, sd: Array, pat: float, val: int, k: String) -> void:
 	bubble = _baked("_draw_bubble")
 	bar = _part("_draw_bar")
 	body = _baked("_draw_body")
+	lids = _part("_draw_lids")
 	resized.connect(_on_resized)
 
 
@@ -106,7 +113,7 @@ func _baked(fn: String):
 
 
 func _on_resized() -> void:
-	for p in [glow, bubble, bar, body]:
+	for p in [glow, bubble, bar, body, lids]:
 		p.size = size
 	glow.queue_redraw()
 	bar.queue_redraw()
@@ -145,13 +152,14 @@ func _process(delta: float) -> void:
 		blinking = false
 	if blinking != _blinking:
 		_blinking = blinking
-		body.refresh()
+		lids.queue_redraw()  # só as pálpebras; o corpo assado não é refeito (mais leve)
 	# balanço / pulo via posição (barato)
 	var bob := sin(_t * 3.0) * 3.0
 	if mood == "happy":
 		bob = -abs(sin(_t * 9.0)) * 14.0
 	var shake := sin(_t * 40.0) * 3.0 if (_angry and mood == "wait") else 0.0
 	body.position = Vector2(shake, bob)
+	lids.position = body.position
 	if waiting and not paused:
 		patience -= delta
 		if patience <= 0.0:
@@ -165,6 +173,11 @@ func _process(delta: float) -> void:
 			body.refresh()
 			if angry:
 				Sfx.play("angry", 1.1)
+				yelled.emit(self, 1)
+		if not _yell2 and ratio() < 0.12:
+			_yell2 = true
+			Sfx.play("angry", 0.9)
+			yelled.emit(self, 2)
 		if abs(ratio() - _bar_drawn) > 0.01:
 			bar.queue_redraw()
 
@@ -205,12 +218,13 @@ func _draw_body(ci: Control) -> void:
 		_draw_crown(ci, head, head_r)
 	var eye_y := head.y - head_r * 0.05
 	var ink := Color("2b1a10")
+	_eyes = [Vector2(head.x - head_r * 0.38, eye_y), Vector2(head.x + head_r * 0.38, eye_y)]
+	_eye_r = head_r * 0.19
+	_lid_col = hc
 	for sgn in [-1, 1]:
 		var e := Vector2(head.x + sgn * head_r * 0.38, eye_y)
 		if mood == "happy":
 			ci.draw_arc(e + Vector2(0, 4), head_r * 0.16, PI * 1.1, PI * 1.9, 8, ink, 4.0)
-		elif _blinking:
-			ci.draw_line(e - Vector2(head_r * 0.14, 0), e + Vector2(head_r * 0.14, 0), ink, 4.0)
 		else:
 			ci.draw_circle(e, head_r * 0.17, Color.WHITE)
 			ci.draw_circle(e + Vector2(0, 1), head_r * 0.1, ink)
@@ -240,6 +254,15 @@ func _draw_body(ci: Control) -> void:
 		ci.draw_arc(m + Vector2(0, head_r * 0.2), head_r * 0.22, PI * 1.15, PI * 1.85, 8, mc, 5.0)
 	else:
 		ci.draw_line(m - Vector2(head_r * 0.2, 0), m + Vector2(head_r * 0.2, 0), mc, 5.0)
+
+
+# Pálpebras do piscar: desenho pequeno por cima do corpo assado.
+func _draw_lids(ci: Control) -> void:
+	if not _blinking or mood == "happy" or _eyes.is_empty():
+		return
+	for e in _eyes:
+		ci.draw_circle(e, _eye_r, _lid_col)
+		ci.draw_line(e - Vector2(_eye_r * 0.75, 0), e + Vector2(_eye_r * 0.75, 0), Color("2b1a10"), 4.0)
 
 
 func _dome(head: Vector2, hr: float, sx: float, sy: float, dy: float) -> PackedVector2Array:

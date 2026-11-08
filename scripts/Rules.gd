@@ -49,7 +49,8 @@ const START_INGREDIENTS := [BUN_BOTTOM, PATTY, CHEESE, LETTUCE, BUN_TOP]
 # Loja. Cada item pode ter vários níveis (tiers): prices[i] e levels[i] (nível de chef exigido).
 const UPGRADES := [
 	{"id": "tomato", "name": "Tomate", "desc": "Novo ingrediente! Libera X-Salada.", "kind": "ing", "item": TOMATO, "prices": [70], "levels": [2]},
-	{"id": "grill", "name": "Chapa maior", "desc": "+1 carne na chapa ao mesmo tempo.", "kind": "grill", "prices": [150, 420], "levels": [2, 6]},
+	{"id": "grill", "name": "Chapa maior", "desc": "+1 carne na chapa ao mesmo tempo.", "kind": "grill", "prices": [60, 240, 520], "levels": [1, 3, 6]},
+	{"id": "exhaust", "name": "Exaustor", "desc": "A carne demora mais pra queimar (+3s).", "kind": "exhaust", "prices": [150, 380], "levels": [2, 5]},
 	{"id": "decor", "name": "Decoração", "desc": "Lanchonete linda: clientes +15% pacientes.", "kind": "decor", "prices": [140, 320, 600], "levels": [2, 4, 7]},
 	{"id": "bacon", "name": "Bacon", "desc": "Crocante! Libera X-Bacon.", "kind": "ing", "item": BACON, "prices": [160], "levels": [3]},
 	{"id": "seat", "name": "Mais bancos", "desc": "Atenda +1 cliente de uma vez (mais dinheiro, mais correria).", "kind": "seat", "prices": [220, 560], "levels": [3, 7]},
@@ -58,6 +59,10 @@ const UPGRADES := [
 	{"id": "tips", "name": "Pote de gorjeta", "desc": "Gorjetas 50% maiores.", "kind": "tips", "prices": [260], "levels": [4]},
 	{"id": "egg", "name": "Ovo", "desc": "Novo ingrediente! Libera X-Egg.", "kind": "ing", "item": EGG, "prices": [280], "levels": [5]},
 	{"id": "soda", "name": "Máquina de refri", "desc": "Clientes pedem refri junto.", "kind": "side", "item": SODA, "prices": [300], "levels": [5]},
+	{"id": "tv", "name": "TV na parede", "desc": "Clientes distraídos: +10% de paciência.", "kind": "tv", "prices": [260], "levels": [4]},
+	{"id": "calm", "name": "Chá de camomila", "desc": "Você fica menos nervoso quando os clientes gritam.", "kind": "calm", "prices": [220], "levels": [3]},
+	{"id": "marketing", "name": "Panfletos", "desc": "Mais fama: lanches 10% mais caros.", "kind": "marketing", "prices": [200, 450], "levels": [3, 6]},
+	{"id": "helper", "name": "Ajudante de chapa", "desc": "Coloca carne na chapa sozinho quando tem espaço livre.", "kind": "helper", "prices": [480], "levels": [5]},
 	{"id": "neon", "name": "Letreiro neon", "desc": "Fama! Lanches 20% mais caros.", "kind": "neon", "prices": [450], "levels": [6]},
 	{"id": "onion", "name": "Cebola", "desc": "Novo ingrediente! Libera X-Cebola.", "kind": "ing", "item": ONION, "prices": [340], "levels": [6]},
 	{"id": "pickle", "name": "Picles", "desc": "Novo ingrediente! Libera o Monstrão.", "kind": "ing", "item": PICKLE, "prices": [420], "levels": [7]},
@@ -67,7 +72,7 @@ const TITLES := ["Aprendiz", "Ajudante", "Chapeiro", "Cozinheiro", "Chef", "Chef
 	"Mestre do Lanche", "Grão-Mestre", "Lenda do Lanche"]
 
 # Chapa
-const BASE_COOK := 9.0
+const BASE_COOK := 12.0
 const MELT_TIME := 2.0  # cheddar derretendo em cima da carne, na chapa
 const BURN_AFTER := 6.0
 const FRY_TIME := 5.0
@@ -119,8 +124,18 @@ static func seat_count(owned: Dictionary) -> int:
 	return 2 + tier(owned, "seat")
 
 
+# Começa com UMA chapa; compra mais na loja (até 4).
 static func grill_slots(owned: Dictionary) -> int:
-	return 2 + tier(owned, "grill")
+	return 1 + tier(owned, "grill")
+
+
+static func burn_after(owned: Dictionary) -> float:
+	return BURN_AFTER + 3.0 * tier(owned, "exhaust")
+
+
+# Quanto o nervosismo sobe a cada grito (o chá de camomila acalma).
+static func nerve_per_yell(owned: Dictionary) -> float:
+	return 0.5 if tier(owned, "calm") > 0 else 1.0
 
 
 static func cook_time(owned: Dictionary) -> float:
@@ -128,11 +143,12 @@ static func cook_time(owned: Dictionary) -> float:
 
 
 static func patience_mult(owned: Dictionary) -> float:
-	return 1.0 + 0.15 * tier(owned, "decor")
+	return 1.0 + 0.15 * tier(owned, "decor") + 0.1 * tier(owned, "tv")
 
 
 static func price_mult(owned: Dictionary) -> float:
-	return 1.2 if tier(owned, "neon") > 0 else 1.0
+	var m := 1.2 if tier(owned, "neon") > 0 else 1.0
+	return m * (1.0 + 0.1 * tier(owned, "marketing"))
 
 
 static func tip_mult(owned: Dictionary) -> float:

@@ -24,6 +24,8 @@ var burn_after: float = 6.0
 var melt_time: float = 2.0
 var paused: bool = false
 var hint_slot: int = -1
+var exhaust: bool = false
+var helper: bool = false
 var _acc: float = 0.0
 var _t: float = 0.0
 
@@ -210,6 +212,17 @@ func _draw() -> void:
 		D.draw_flame(self, Vector2(32.0 + k * 20.0, h * 0.5 + 30), 7.0 + fl * 5.0)
 	for i in slots.size():
 		_draw_slot(i)
+	# exaustor: coifa em cima da chapa; ajudante: chapéu de chef na placa
+	if exhaust:
+		draw_rect(Rect2(110, 0, w - 120, 5), Color("adb5bd"))
+		for k in int((w - 120) / 40.0):
+			draw_line(Vector2(120 + k * 40, 1), Vector2(132 + k * 40, 1), Color("6c757d"), 2.0)
+	if helper:
+		var hc := Vector2(86, 18)
+		draw_circle(hc + Vector2(-7, 0), 7, Color.WHITE)
+		draw_circle(hc + Vector2(7, 0), 7, Color.WHITE)
+		draw_circle(hc + Vector2(0, -5), 8, Color.WHITE)
+		draw_rect(Rect2(hc.x - 9, hc.y + 2, 18, 7), Color.WHITE)
 
 
 func _draw_slot(i: int) -> void:

@@ -28,6 +28,25 @@ const GAP := 10.0
 const MAX_LINE := 6
 
 
+# Borda vermelha pulsando quando o chef está nervoso (desenho barato: 8 retângulos).
+class NerveFx extends Control:
+	var level := 0.0
+	var t := 0.0
+	func _draw() -> void:
+		if level <= 0.05:
+			return
+		var a := clampf(level / 5.0, 0.0, 1.0) * (0.55 + 0.45 * absf(sin(t * (3.0 + level))))
+		var w := size.x
+		var h := size.y
+		for k in 2:
+			var b := 26.0 - k * 12.0
+			var c := Color(0.9, 0.05, 0.05, a * (0.22 + k * 0.2))
+			draw_rect(Rect2(0, 0, w, b), c)
+			draw_rect(Rect2(0, h - b, w, b), c)
+			draw_rect(Rect2(0, 0, b, h), c)
+			draw_rect(Rect2(w - b, 0, b, h), c)
+
+
 class FlyIcon extends Control:
 	var item := 0
 	func _draw() -> void:
@@ -111,6 +130,11 @@ var _menu_t: float = 0.0
 var _menu_acc: float = 0.0
 var _build_id: int = 0
 var _last_action: Dictionary = {}
+var nerve: float = 0.0          # 0..5: sobe quando cliente grita
+var nerve_fx
+var _heart_t: float = 0.0
+var _helper_t: float = 3.0
+var _nerve_acc: float = 0.0
 
 
 # Proteção contra o mesmo toque chegar duas vezes (nenhum humano toca 2x em menos de 60 ms).
@@ -296,6 +320,11 @@ func _build_game() -> void:
 	banner = _label("", 26, Color.WHITE, 10)
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	game_root.add_child(banner)
+
+	nerve_fx = NerveFx.new()
+	nerve_fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	nerve_fx.set_anchors_preset(Control.PRESET_FULL_RECT)
+	game_root.add_child(nerve_fx)
 
 	fx = Control.new()
 	fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -859,6 +888,7 @@ func _buy(id: String) -> void:
 
 # ------------------------------------------------------------------ dia
 func _start_day() -> void:
+	nerve = 0.0
 	print("[LP] começando dia %d" % Game.day)
 	_hide_overlays()
 	menu_screen.visible = false
@@ -875,7 +905,9 @@ func _start_day() -> void:
 	seats = []
 	for i in R.seat_count(Game.owned):
 		seats.append(null)
-	grill.setup(R.grill_slots(Game.owned), R.cook_time(Game.owned), R.BURN_AFTER)
+	grill.setup(R.grill_slots(Game.owned), R.cook_time(Game.owned), R.burn_after(Game.owned))
+	grill.exhaust = R.tier(Game.owned, "exhaust") > 0
+	grill.helper = R.tier(Game.owned, "helper") > 0
 	line_count = 0
 	built = []
 	built_sides = []
@@ -937,6 +969,8 @@ func _tick(delta: float) -> void:
 	if tiles.has(R.SODA):
 		tiles[R.SODA].progress = pour_t / R.POUR_TIME if pour_t >= 0.0 else -1.0
 	Sfx.set_grill(grill.any_cooking())
+	_tick_nerve(delta)
+	_tick_helper(delta)
 	if tut < 99:
 		_tut_eval()
 		_update_hud()
@@ -951,7 +985,7 @@ func _tick(delta: float) -> void:
 		var rush_now: bool = rush.size() == 2 and elapsed >= rush[0] and elapsed < rush[1]
 		if rush_now != in_rush:
 			in_rush = rush_now
-			Sfx.set_music(true, in_rush)
+			Sfx.set_music(true, in_rush or nerve >= 3.0)
 			if in_rush:
 				Sfx.play("rush")
 				_show_banner("HORA DO RUSH! Muitos clientes!", 2.5)
@@ -959,6 +993,8 @@ func _tick(delta: float) -> void:
 		spawn_t -= delta
 		if spawn_t <= 0.0:
 			var iv := R.spawn_interval(Game.day, seats.size())
+			# com poucas chapas os clientes chegam mais devagar
+			iv *= 1.0 + 0.12 * (4 - R.grill_slots(Game.owned))
 			if in_rush:
 				iv /= 2.2
 			spawn_t = iv * rng.randf_range(0.75, 1.25)
@@ -1028,6 +1064,7 @@ func _spawn_in_seat(i: int) -> void:
 		R.order_value(rec, sides, Game.owned, kind), kind)
 	c.tapped.connect(_on_customer_tapped)
 	c.ran_out.connect(_on_customer_ran_out)
+	c.yelled.connect(_on_customer_yelled)
 	customer_layer.add_child(c)
 	seats[i] = c
 	var r := _seat_rect(i)
@@ -1285,6 +1322,7 @@ func _on_deliver() -> void:
 		_show_banner("Lanche aberto, sem o pão de cima! -2 estrelas", 1.6)
 	if stars == 3:
 		stats["combo"] += 1
+		nerve = maxf(0.0, nerve - 1.0)  # lanche perfeito acalma
 	else:
 		_break_combo()
 	var combo: int = stats["combo"]
@@ -1382,6 +1420,76 @@ func _seat_freed(i: int, c) -> void:
 		_spawn_in_seat(i)
 	elif state == PLAY:
 		spawn_t = minf(spawn_t, 1.5)
+
+
+# ------------------------------------------------------------------ nervosismo e ajudante
+const YELL_1 := ["Anda logo!", "Tô com fome!", "Cadê meu lanche?", "Vai demorar?"]
+const YELL_2 := ["ANDA!!!", "VOU EMBORA!", "QUE DEMORA!", "AFF!!!"]
+
+
+func _on_customer_yelled(c, level: int) -> void:
+	if state != PLAY and state != CLOSING:
+		return
+	var txt: String = (YELL_1 if level == 1 else YELL_2).pick_random()
+	_float_text(c.position + Vector2(c.size.x / 2, c.bubble_h - 40), txt, Color("ff4d4d") if level == 2 else Color("ffa94d"))
+	var before := nerve
+	nerve = minf(5.0, nerve + R.nerve_per_yell(Game.owned) * (1.0 if level == 1 else 1.5))
+	_shake_screen(6.0 + level * 4.0)
+	Input.vibrate_handheld(50 if level == 1 else 120)
+	if before < 3.0 and nerve >= 3.0:
+		_show_banner("Você está NERVOSO! Respira e capricha no próximo.", 2.2)
+		Sfx.set_music(true, true)
+
+
+func _shake_screen(amount: float) -> void:
+	var tw := create_tween()
+	for i in 6:
+		var k := amount * (1.0 - i / 6.0)
+		tw.tween_property(game_root, "position", Vector2(rng.randf_range(-k, k), rng.randf_range(-k, k)), 0.035)
+	tw.tween_property(game_root, "position", Vector2.ZERO, 0.04)
+
+
+func _tick_nerve(delta: float) -> void:
+	if nerve <= 0.0 and nerve_fx.level <= 0.0:
+		return
+	nerve = maxf(0.0, nerve - delta / 7.0)
+	nerve_fx.level = nerve
+	nerve_fx.t += delta
+	_nerve_acc += delta
+	if _nerve_acc > 0.066:
+		_nerve_acc = 0.0
+		nerve_fx.queue_redraw()
+	# mãos tremendo: os botões balançam (só transformação, barato)
+	var shake := maxf(0.0, nerve - 1.5) * 0.012
+	var i := 0
+	for it in tiles:
+		tiles[it].rotation = sin(nerve_fx.t * 31.0 + i * 1.7) * shake
+		i += 1
+	# coração acelerado
+	if nerve >= 2.0:
+		_heart_t -= delta
+		if _heart_t <= 0.0:
+			_heart_t = 1.1 - nerve * 0.12
+			Sfx.play("heart", 1.0, -2.0)
+	if nerve < 3.0 and not in_rush:
+		Sfx.set_music(true, false)
+
+
+func _tick_helper(delta: float) -> void:
+	if R.tier(Game.owned, "helper") == 0 or state != PLAY:
+		return
+	_helper_t -= delta
+	if _helper_t > 0.0:
+		return
+	_helper_t = 4.0
+	# só põe carne se algum cliente esperando precisa e não tem carne crua assando
+	var need := false
+	for c in seats:
+		if c != null and c.mood == "wait" and c.recipe["layers"].has(R.PATTY):
+			need = true
+	if need and grill.count_state("raw") == 0 and grill.add_raw():
+		Sfx.play("sizzle", 1.0, -6.0)
+		_float_text(grill.position + Vector2(size.x / 2, 10), "Ajudante: carne na chapa!", Color("8ce99a"))
 
 
 # ------------------------------------------------------------------ tutorial

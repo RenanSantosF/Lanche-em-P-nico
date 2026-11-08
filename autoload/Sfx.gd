@@ -4,7 +4,7 @@ extends Node
 
 const NAMES := ["pop", "bun", "click", "sizzle", "ready", "burnt", "trash", "bell", "coin",
 	"good", "perfect", "bad", "angry", "nope", "buy", "fanfare", "levelup", "rush", "combo",
-	"fries_ready", "fry", "pour"]
+	"fries_ready", "fry", "pour", "heart"]
 
 var sounds: Dictionary = {}
 var players: Array = []

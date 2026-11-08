@@ -75,7 +75,7 @@ func _rebake() -> void:
 
 func refresh() -> void:
 	theme_idx = clampi(R.total_tiers(owned) / 4, 0, THEMES.size() - 1)
-	var need_anim := mode == "wall" and (R.tier(owned, "decor") >= 2 or R.tier(owned, "neon") > 0)
+	var need_anim := mode == "wall" and (R.tier(owned, "decor") >= 2 or R.tier(owned, "neon") > 0 or R.tier(owned, "tv") > 0)
 	if need_anim and _anim == null:
 		_anim = Anim.new()
 		_anim.host = self
@@ -182,6 +182,17 @@ func _draw_wall(ci: Control) -> void:
 		sx += stripe
 		i += 1
 	ci.draw_rect(Rect2(0, 0, w, 8), Color(0, 0, 0, 0.12))
+	# panfletos colados na parede (marketing)
+	var mk := R.tier(owned, "marketing")
+	for k in mk:
+		var px := w * (0.3 + k * 0.4)
+		var pr := Rect2(px - 34, tile_y + 14, 68, 86)
+		ci.draw_rect(pr, Color("fff3bf"))
+		ci.draw_rect(Rect2(pr.position.x, pr.position.y, pr.size.x, 22), Color("ff6b6b"))
+		D.text(ci, Game.font, Vector2(pr.position.x, pr.position.y + 18), "PROMO", 15, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, pr.size.x)
+		D.draw_layer(ci, R.BUN_BOTTOM, px, pr.end.y - 12, 44)
+		D.draw_layer(ci, R.PATTY, px, pr.end.y - 20, 44)
+		D.draw_layer(ci, R.BUN_TOP, px, pr.end.y - 26, 44)
 	# plantas (decoração nível 1)
 	if R.tier(owned, "decor") >= 1:
 		for px in [34.0, w - 34.0]:
@@ -196,6 +207,16 @@ func _draw_wall(ci: Control) -> void:
 
 func draw_anim(ci: Control, t: float) -> void:
 	var w := size.x
+	# TV na parede (tela muda de cor a cada poucos segundos)
+	if R.tier(owned, "tv") > 0:
+		var tv := Rect2(w * 0.85 - 62, size.y * 0.62 - 150, 124, 84)
+		D.fill_rrect(ci, tv.grow(6), 10, Color("212529"))
+		var cols := [Color("4dabf7"), Color("69db7c"), Color("ffa94d"), Color("da77f2")]
+		var c: Color = cols[int(t / 2.5) % cols.size()]
+		ci.draw_rect(tv, c)
+		ci.draw_circle(tv.position + Vector2(36, 42), 16, c.lightened(0.4))
+		ci.draw_rect(Rect2(tv.position.x + 60, tv.position.y + 50, 50, 8), c.darkened(0.3))
+		ci.draw_line(tv.get_center() + Vector2(0, 48), tv.get_center() + Vector2(0, 62), Color("212529"), 6)
 	if R.tier(owned, "neon") > 0:
 		var glow := 0.75 + 0.25 * sin(t * 3.0)
 		if fmod(t, 5.0) > 4.7:

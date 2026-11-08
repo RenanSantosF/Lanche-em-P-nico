@@ -292,6 +292,14 @@ def sfx():
         place(bub, sweep(rng.uniform(500, 900), rng.uniform(900, 1400), 0.03) * env_exp(0.03, 80), rng.uniform(0, d - 0.04))
     save("audio/fry.wav", fade(x * 0.5 + bub * 0.6, 0.01, 0.2), 0.5)
 
+    # heart: coração acelerado (nervosismo) - "tum-tum" grave
+    x = np.zeros(int(SR * 0.6))
+    for dt, amp in [(0.0, 1.0), (0.17, 0.75)]:
+        th = sweep(95, 45, 0.16, curve=0.5) * env_exp(0.16, 22) * amp
+        th += lowpass(noise(0.16), 300) * env_exp(0.16, 40) * 0.3 * amp
+        place(x, th, dt)
+    save("audio/heart.wav", fade(lowpass(x, 900), 0.002, 0.05), 0.8)
+
     # pour: refri enchendo
     d = 0.9
     x = lowpass(noise(d), 1500) * 0.4
