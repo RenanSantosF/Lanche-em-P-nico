@@ -16,7 +16,7 @@
 | **Android mínimo / alvo** | Android 7.0 (API 24) / Android 16 (API 36) |
 | **Arquivo para a loja** | `lanche-em-panico.aab` (Release no GitHub, gerado quando os secrets da chave existem) |
 | **Assinatura** | Chave de upload `lanche-upload.jks`, alias `lanche` + Assinatura de apps do Google Play |
-| **Política de privacidade** | `https://renansantosf.github.io/Lanche-em-P-nico/privacy.html` |
+| **Política de privacidade** | `https://github.com/RenanSantosF/Lanche-em-P-nico/blob/main-7787344074917853781/PRIVACY.md` |
 | **AdMob – ID do app** | `ca-app-pub-4311255826061303~4157782489` |
 | **AdMob – Intersticial "A cada fase"** | `ca-app-pub-4311255826061303/7993085719` |
 | **AdMob – Premiado "Recompensa"** | `ca-app-pub-4311255826061303/7320353635` |
@@ -38,7 +38,7 @@ Tudo o que dá para automatizar já está pronto no repositório. Este guia most
 | APK de teste para o celular (anúncios de TESTE do Google) | Mesma Release: `lanche-em-panico.apk` |
 | Alvo Android 16 (API 36), exigido pela Play Store | Godot 4.7.2 |
 | AdMob: intersticial "A cada fase" + premiado "Recompensa" + consentimento GDPR | `autoload/Ads.gd` |
-| Política de privacidade (PT/EN/ES) | `docs/privacy.html` → publicada pelo GitHub Pages |
+| Política de privacidade (PT/EN/ES) | `PRIVACY.md` (o próprio link do GitHub) |
 | Ícone 512×512 | `store/play_icon_512.png` |
 | Gráfico de destaque 1024×500 | `store/feature_graphic_1024x500.png` |
 | Capturas de tela 1080×1920 (PT, EN e ES) | `store/screenshots/` |
@@ -62,10 +62,10 @@ No GitHub: **Settings → Secrets and variables → Actions → New repository s
 
 Depois vá em **Actions → Build Android → Run workflow**. A Release nova vai trazer o `lanche-em-panico.aab`.
 
-## Passo 2 — Ativar a página da política de privacidade
+## Passo 2 — Política de privacidade
 
-**Settings → Pages → Build and deployment → Source: GitHub Actions**. Depois rode **Actions → Site (política de privacidade) → Run workflow**.
-O endereço fica: `https://renansantosf.github.io/Lanche-em-P-nico/privacy.html`
+Já está publicada no próprio GitHub (o repositório é público):
+https://github.com/RenanSantosF/Lanche-em-P-nico/blob/main-7787344074917853781/PRIVACY.md
 
 ## Passo 3 — Conta de desenvolvedor
 
@@ -76,7 +76,7 @@ O endereço fica: `https://renansantosf.github.io/Lanche-em-P-nico/privacy.html`
 
 - Nome: **Lanche em Pânico** · Idioma padrão: Português (Brasil) · Tipo: **Jogo** · **Gratuito**
 - Em **Configurar o app**, responda:
-  - **Política de privacidade:** a URL do Passo 2.
+  - **Política de privacidade:** o link da política de privacidade (Passo 2).
   - **Anúncios:** **Sim, o app contém anúncios.**
   - **Acesso ao app:** todo o conteúdo está disponível sem login.
   - **Classificação do conteúdo:** questionário IARC → categoria *Jogo*. Sem violência, sem compras, **com anúncios**. Deve sair "Livre" / "Everyone".
