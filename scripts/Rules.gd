@@ -9,7 +9,7 @@ const SODA := 101
 const BUN := -1  # botão único de pão: base quando vazio, tampa quando já tem algo
 
 const NAMES := {
-	BUN_BOTTOM: "Pão", PATTY: "Carne", CHEESE: "Queijo", LETTUCE: "Alface",
+	BUN_BOTTOM: "Pão", PATTY: "Carne", CHEESE: "Cheddar", LETTUCE: "Alface",
 	TOMATO: "Tomate", BACON: "Bacon", EGG: "Ovo", ONION: "Cebola", PICKLE: "Picles",
 	BUN_TOP: "Pão", FRIES: "Batata", SODA: "Refri", BUN: "Pão",
 }
@@ -33,10 +33,12 @@ const MENU := [
 	{"name": "Tomatinho", "layers": [B, PATTY, TOMATO, T], "price": 11},
 	{"name": "X-Bacon", "layers": [B, PATTY, CHEESE, BACON, T], "price": 15},
 	{"name": "Bacon Duplo", "layers": [B, PATTY, BACON, PATTY, CHEESE, BACON, T], "price": 23},
-	{"name": "X-Egg", "layers": [B, PATTY, EGG, CHEESE, T], "price": 15},
-	{"name": "Café da Manhã", "layers": [B, BACON, EGG, CHEESE, T], "price": 16},
+	{"name": "X-Egg", "layers": [B, PATTY, CHEESE, EGG, T], "price": 15},
+	{"name": "Café da Manhã", "layers": [B, PATTY, CHEESE, BACON, EGG, T], "price": 19},
 	{"name": "X-Cebola", "layers": [B, PATTY, CHEESE, ONION, T], "price": 14},
-	{"name": "Picles Show", "layers": [B, PATTY, PICKLE, CHEESE, PICKLE, T], "price": 16},
+	{"name": "Picles Show", "layers": [B, PICKLE, PATTY, CHEESE, PICKLE, T], "price": 16},
+	{"name": "Salada Fresca", "layers": [B, LETTUCE, PATTY, TOMATO, ONION, T], "price": 16},
+	{"name": "Egg Bacon", "layers": [B, PATTY, EGG, BACON, T], "price": 17},
 	{"name": "X-Tudo", "layers": [B, LETTUCE, TOMATO, PATTY, CHEESE, BACON, EGG, ONION, T], "price": 30},
 	{"name": "Monstrão", "layers": [B, PATTY, CHEESE, BACON, PATTY, CHEESE, EGG, PICKLE, T], "price": 32},
 ]
@@ -65,7 +67,8 @@ const TITLES := ["Aprendiz", "Ajudante", "Chapeiro", "Cozinheiro", "Chef", "Chef
 	"Mestre do Lanche", "Grão-Mestre", "Lenda do Lanche"]
 
 # Chapa
-const BASE_COOK := 6.5
+const BASE_COOK := 7.5
+const MELT_TIME := 2.0  # cheddar derretendo em cima da carne, na chapa
 const BURN_AFTER := 6.0
 const FRY_TIME := 5.0
 const POUR_TIME := 1.6
@@ -224,22 +227,32 @@ static func available_recipes(owned: Dictionary, day: int) -> Array:
 
 static func custom_recipe(owned: Dictionary, day: int, rnd: RandomNumberGenerator) -> Dictionary:
 	var have := unlocked_ingredients(owned)
-	have.erase(BUN_BOTTOM)
-	have.erase(BUN_TOP)
-	var n := rnd.randi_range(2, mini(3 + day / 3, 6))
+	for x in [BUN_BOTTOM, BUN_TOP, CHEESE, PATTY]:
+		have.erase(x)
+	var n := rnd.randi_range(1, mini(2 + day / 3, 5))
 	var layers := [B]
-	var patties := 0
+	var patties := 1 if rnd.randf() < 0.75 else 2
+	var middle := []
 	for i in n:
-		var it: int = have[rnd.randi_range(0, have.size() - 1)]
-		if it == PATTY:
-			patties += 1
-			if patties > 2:
-				it = CHEESE
-		layers.append(it)
-	if not layers.has(PATTY) and rnd.randf() < 0.7:
-		layers.insert(1, PATTY)
+		middle.append(have[rnd.randi_range(0, have.size() - 1)])
+	for p in patties:
+		var at := rnd.randi_range(0, middle.size())
+		while at < middle.size() and middle[at] == CHEESE:
+			at += 1
+		if rnd.randf() < 0.6:
+			middle.insert(at, CHEESE)  # o cheddar sempre vai em cima da carne
+		middle.insert(at, PATTY)
+	layers.append_array(middle)
 	layers.append(T)
 	return {"name": CUSTOM_NAME, "layers": layers, "price": 4 + layers.size() * 2, "custom": true}
+
+
+# O cheddar só pode vir logo depois de uma carne (ele derrete em cima dela, na chapa).
+static func cheese_ok(layers: Array) -> bool:
+	for i in layers.size():
+		if layers[i] == CHEESE and (i == 0 or layers[i - 1] != PATTY):
+			return false
+	return true
 
 
 # Tipos de cliente: normal, kid, vip, critic

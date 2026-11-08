@@ -321,3 +321,11 @@ static func flame_points(base: Vector2, s: float) -> PackedVector2Array:
 static func draw_flame(ci: CanvasItem, base: Vector2, s: float) -> void:
 	ci.draw_colored_polygon(flame_points(base, s), Color("ff6b1a"))
 	ci.draw_colored_polygon(flame_points(base + Vector2(0, -s * 0.05), s * 0.55), Color("ffd43b"))
+
+
+# Diminui o tamanho da fonte até o texto caber na largura (textos em EN/ES podem ser maiores).
+static func fit(font: Font, s: String, size: int, max_w: float, min_size: int = 11) -> int:
+	var fs := size
+	while fs > min_size and font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:
+		fs -= 1
+	return fs

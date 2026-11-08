@@ -45,7 +45,7 @@ func _draw() -> void:
 	draw_circle(c, 24, Color("ffd21f"))
 	D.text(self, Game.font, Vector2(c.x - 28, c.y + 10), str(lv), 28, Color("5c2c0c"), HORIZONTAL_ALIGNMENT_CENTER, 56)
 	var x0 := 70.0
-	D.text(self, Game.font, Vector2(x0, size.y / 2 - 8), R.title_for_level(lv), 24, txt)
+	D.text(self, Game.font, Vector2(x0, size.y / 2 - 8), L.t(R.title_for_level(lv)), 24, txt)
 	D.text(self, Game.font, Vector2(x0, size.y / 2 - 8), "%d/%d XP" % [int(shown_xp) - a, b - a], 18, txt.lerp(Color.GRAY, 0.3), HORIZONTAL_ALIGNMENT_RIGHT, size.x - x0)
 	var bar := Rect2(x0, size.y / 2 + 2, size.x - x0, 18)
 	D.fill_rrect(self, bar, 9, Color(0, 0, 0, 0.25))

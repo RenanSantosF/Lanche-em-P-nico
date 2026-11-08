@@ -20,13 +20,14 @@ func show_order(rec: Dictionary, sd: Array, b: Array, bs: Array) -> void:
 	queue_redraw()
 
 
+const SHOW_MARKS := false  # modo Normal: a comanda não diz o que está certo
 var _acc: float = 0.0
 
 
 func _process(delta: float) -> void:
 	_t += delta
 	# só pisca a linha "próxima" no modo Fácil, e a ~10 quadros/s
-	if Game.easy and not recipe.is_empty():
+	if SHOW_MARKS and not recipe.is_empty():
 		_acc += delta
 		if _acc > 0.1:
 			_acc = 0.0
@@ -40,11 +41,11 @@ func _draw() -> void:
 	D.fill_rrect(self, Rect2(0, 0, size.x, 50), 16, Color("ff8c42"))
 	draw_rect(Rect2(0, 34, size.x, 16), Color("ff8c42"))
 	if recipe.is_empty():
-		D.text(self, Game.font, Vector2(0, 34), "COMANDA", 22, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, size.x)
-		D.text(self, Game.font, Vector2(10, size.y * 0.5), "Esperando", 22, Color("adb5bd"), HORIZONTAL_ALIGNMENT_CENTER, size.x - 20)
-		D.text(self, Game.font, Vector2(10, size.y * 0.5 + 30), "clientes...", 22, Color("adb5bd"), HORIZONTAL_ALIGNMENT_CENTER, size.x - 20)
+		D.text(self, Game.font, Vector2(0, 34), L.t("COMANDA"), 22, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, size.x)
+		D.text(self, Game.font, Vector2(10, size.y * 0.5), L.t("Esperando"), 22, Color("adb5bd"), HORIZONTAL_ALIGNMENT_CENTER, size.x - 20)
+		D.text(self, Game.font, Vector2(10, size.y * 0.5 + 30), L.t("clientes..."), 22, Color("adb5bd"), HORIZONTAL_ALIGNMENT_CENTER, size.x - 20)
 		return
-	D.text(self, Game.font, Vector2(4, 34), recipe["name"], 24, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8)
+	D.text(self, Game.font, Vector2(4, 34), L.t(recipe["name"]), D.fit(Game.font, L.t(recipe["name"]), 24, size.x - 16), Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8)
 
 	var layers: Array = recipe["layers"]
 	var rows := layers.size() + sides.size()
@@ -60,7 +61,7 @@ func _draw() -> void:
 	# de cima (último) para baixo (primeiro)
 	for k in range(layers.size() - 1, -1, -1):
 		var state := 0  # 0 pendente, 1 ok, 2 errado, 3 próximo
-		if not Game.easy:
+		if not SHOW_MARKS:
 			pass
 		elif k < built.size():
 			state = 1 if built[k] == layers[k] else 2
@@ -69,7 +70,7 @@ func _draw() -> void:
 		_row(layers[k], y, row_h, font_size, state)
 		y += row_h
 	for s in sides:
-		_row(s, y, row_h, font_size, 1 if (Game.easy and built_sides.has(s)) else 0)
+		_row(s, y, row_h, font_size, 1 if (SHOW_MARKS and built_sides.has(s)) else 0)
 		y += row_h
 
 
@@ -89,8 +90,8 @@ func _row(item: int, y: float, h: float, fs: int, state: int) -> void:
 		col = Color("2b8a3e")
 	elif state == 2:
 		col = Color("c92a2a")
-	var item_name: String = R.NAMES[item]
-	D.text(self, Game.font, Vector2(20 + icon_s, y + h * 0.5 + fs * 0.36), item_name, fs, col)
+	var item_name: String = L.t(R.NAMES[item])
+	D.text(self, Game.font, Vector2(20 + icon_s, y + h * 0.5 + fs * 0.36), item_name, D.fit(Game.font, item_name, fs, size.x - icon_s - 54), col)
 	var mark := Vector2(size.x - 24, y + h * 0.5)
 	if state == 1:
 		draw_polyline(PackedVector2Array([mark + Vector2(-9, 0), mark + Vector2(-2, 7), mark + Vector2(10, -8)]), Color("2b8a3e"), 5.0, true)

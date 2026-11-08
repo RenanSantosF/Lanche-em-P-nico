@@ -91,8 +91,8 @@ func _draw_face(ci: Control) -> void:
 	D.fill_rrect(ci, Rect2(body.position + Vector2(8, 5), Vector2(body.size.x - 16, body.size.y * 0.26)), 12, Color(1, 1, 1, 0.3))
 	var icon_s := minf(body.size.x, body.size.y) * 0.6
 	D.draw_icon(ci, item, Vector2(body.size.x / 2, body.size.y * 0.42), icon_s)
-	var fs := 21 if size.x > 120 else 18
-	D.text(ci, Game.font, Vector2(0, body.size.y - 14), R.NAMES[item],
+	var fs := D.fit(Game.font, L.t(R.NAMES[item]), 21 if size.x > 120 else 18, size.x - 10)
+	D.text(ci, Game.font, Vector2(0, body.size.y - 14), L.t(R.NAMES[item]),
 		fs, Color("4a2a12"), HORIZONTAL_ALIGNMENT_CENTER, body.size.x, 6, Color(1, 1, 1, 0.8))
 
 

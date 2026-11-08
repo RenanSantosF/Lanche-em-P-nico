@@ -163,12 +163,12 @@ func _draw_wall(ci: Control) -> void:
 			var board := Rect2(w / 2 - 120, board_y, 240, 52 + rows * 28)
 			D.fill_rrect(ci, board.grow(8), 14, th["wood"])
 			D.fill_rrect(ci, board, 10, Color("2f3e36"))
-			D.text(ci, Game.font, Vector2(board.position.x, board.position.y + 36), "CARDÁPIO", 26, Color("fff3bf"), HORIZONTAL_ALIGNMENT_CENTER, board.size.x)
+			D.text(ci, Game.font, Vector2(board.position.x, board.position.y + 36), L.t("CARDÁPIO"), 26, Color("fff3bf"), HORIZONTAL_ALIGNMENT_CENTER, board.size.x)
 			var first := menu_lines.size() - rows
 			for k in rows:
 				var line: Array = menu_lines[first + k]
 				var ly := board.position.y + 70 + k * 28
-				D.text(ci, Game.font, Vector2(board.position.x + 14, ly), line[0], 19, Color("e9ecef"))
+				D.text(ci, Game.font, Vector2(board.position.x + 14, ly), L.t(line[0]), D.fit(Game.font, L.t(line[0]), 19, board.size.x - 80), Color("e9ecef"))
 				D.text(ci, Game.font, Vector2(board.position.x, ly), "$%d" % line[1], 19, Color("ffd43b"), HORIZONTAL_ALIGNMENT_RIGHT, board.size.x - 14)
 	# toldo listrado
 	var stripe := 60.0
@@ -202,7 +202,7 @@ func draw_anim(ci: Control, t: float) -> void:
 			glow = 0.3
 		var sign_r := Rect2(w / 2 - 200, 6, 400, 50)
 		D.fill_rrect(ci, sign_r, 16, Color("1b1035"))
-		D.text(ci, Game.font, Vector2(sign_r.position.x, sign_r.position.y + 37), "LANCHE EM PÂNICO", 30,
+		D.text(ci, Game.font, Vector2(sign_r.position.x, sign_r.position.y + 37), L.t("LANCHE EM PÂNICO"), D.fit(Game.font, L.t("LANCHE EM PÂNICO"), 30, 380),
 			Color(1.0, 0.45, 0.8, glow), HORIZONTAL_ALIGNMENT_CENTER, sign_r.size.x, 10, Color(1.0, 0.2, 0.7, 0.35 * glow))
 	if R.tier(owned, "decor") >= 2:
 		var bulbs := [Color("ff6b6b"), Color("ffd43b"), Color("69db7c"), Color("4dabf7"), Color("da77f2")]

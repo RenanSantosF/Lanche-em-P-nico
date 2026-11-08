@@ -13,8 +13,9 @@ var owned: Dictionary = {}       # id -> tier comprado
 var day_best: Dictionary = {}    # dia -> melhor nota (estrelas)
 var best_combo: int = 0
 var total_served: int = 0
-var easy: bool = true            # modo Fácil = dicas ligadas
-var mode_chosen: bool = false
+var easy: bool = false           # o jogo é sempre no modo Normal (dicas só no tutorial)
+var lang: String = "pt"
+var lang_chosen: bool = false
 var sfx_on: bool = true
 var music_on: bool = true
 var tutorial_done: bool = false
@@ -26,6 +27,8 @@ func _ready() -> void:
 	font = FontVariation.new()
 	font.base_font = ThemeDB.fallback_font
 	font.variation_embolden = 0.9
+	var sys := OS.get_locale_language()
+	lang = sys if sys in ["pt", "en", "es"] else "en"
 	load_game()
 
 
@@ -82,8 +85,8 @@ func save_game() -> void:
 	cfg.set_value("p", "day_best", day_best)
 	cfg.set_value("p", "best_combo", best_combo)
 	cfg.set_value("p", "total_served", total_served)
-	cfg.set_value("p", "easy", easy)
-	cfg.set_value("p", "mode_chosen", mode_chosen)
+	cfg.set_value("p", "lang", lang)
+	cfg.set_value("p", "lang_chosen", lang_chosen)
 	cfg.set_value("p", "sfx_on", sfx_on)
 	cfg.set_value("p", "music_on", music_on)
 	cfg.set_value("p", "tutorial_done", tutorial_done)
@@ -101,8 +104,8 @@ func load_game() -> void:
 	day_best = cfg.get_value("p", "day_best", {})
 	best_combo = cfg.get_value("p", "best_combo", 0)
 	total_served = cfg.get_value("p", "total_served", 0)
-	easy = cfg.get_value("p", "easy", true)
-	mode_chosen = cfg.get_value("p", "mode_chosen", false)
+	lang = cfg.get_value("p", "lang", lang)
+	lang_chosen = cfg.get_value("p", "lang_chosen", false)
 	sfx_on = cfg.get_value("p", "sfx_on", true)
 	music_on = cfg.get_value("p", "music_on", true)
 	tutorial_done = cfg.get_value("p", "tutorial_done", false)

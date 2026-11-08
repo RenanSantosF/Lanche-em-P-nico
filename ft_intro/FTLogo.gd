@@ -3,13 +3,17 @@ extends RefCounted
 # O "F" e o "T" compartilham a barra de cima; um nó de circuito laranja
 # sai do braço do F (tecnologia). Coordenadas numa grade 0..100.
 
-const BG := Color("0b1020")
-const BADGE_TOP := Color("243b8f")
-const BADGE_BOT := Color("101a4d")
-const EDGE := Color("22d3ee")
+const BG := Color("14082e")
+const BADGE_A := Color("ff006e")   # magenta (canto de cima/esquerda)
+const BADGE_B := Color("8338ec")   # violeta (meio)
+const BADGE_C := Color("3a86ff")   # azul (canto de baixo/direita)
+const BADGE_TOP := BADGE_B
+const EDGE := Color("ffbe0b")      # contorno amarelo vivo
+const TRACE := Color("00f5d4")     # circuito verde-água
 const LETTER_TOP := Color("ffffff")
-const LETTER_BOT := Color("8be3ff")
-const NODE := Color("ff9f1c")
+const LETTER_BOT := Color("fff3b0")
+const NODE := Color("00f5d4")
+const PALETTE := [Color("ff006e"), Color("ffbe0b"), Color("00f5d4"), Color("3a86ff"), Color("fb5607"), Color("8338ec")]
 
 # [x0, y0, x1, y1, direção de crescimento ("x" ou "y"), início, fim] (tempo 0..1)
 const BARS := [
@@ -38,6 +42,17 @@ static func _grad(pts: PackedVector2Array, y0: float, y1: float, c0: Color, c1: 
 	return cols
 
 
+# degradê diagonal de 3 cores (magenta -> violeta -> azul)
+static func _grad3(pts: PackedVector2Array, c: Vector2, half: float, a: float) -> PackedColorArray:
+	var cols := PackedColorArray()
+	for p in pts:
+		var k := clampf(((p.x - c.x) + (p.y - c.y)) / (4.0 * half) + 0.5, 0.0, 1.0)
+		var col := BADGE_A.lerp(BADGE_B, k * 2.0) if k < 0.5 else BADGE_B.lerp(BADGE_C, (k - 0.5) * 2.0)
+		col.a = a
+		cols.append(col)
+	return cols
+
+
 static func _xf(pts: PackedVector2Array, origin: Vector2, s: float) -> PackedVector2Array:
 	var out := PackedVector2Array()
 	for p in pts:
@@ -59,8 +74,7 @@ static func draw_logo(ci: CanvasItem, center: Vector2, size: float, draw: float 
 			for k in 3:
 				var gp := _xf(_rr(-14 - k * 4, -14 - k * 4, 114 + k * 4, 114 + k * 4, 32 + k * 4), center, bs)
 				ci.draw_colored_polygon(gp, Color(EDGE, 0.10 * glow * a))
-		var cols := _grad(bp, center.y - 64 * bs, center.y + 64 * bs, Color(BADGE_TOP, a), Color(BADGE_BOT, a))
-		ci.draw_polygon(bp, cols)
+		ci.draw_polygon(bp, _grad3(bp, center, 64 * bs, a))
 		var closed := bp.duplicate()
 		closed.append(bp[0])
 		ci.draw_polyline(closed, Color(EDGE, 0.9 * a), maxf(2.0, 3.0 * s), true)
@@ -73,9 +87,9 @@ static func draw_logo(ci: CanvasItem, center: Vector2, size: float, draw: float 
 		var path := PackedVector2Array([p0, p1])
 		if tr > 0.3:
 			path.append(p1.lerp(p2, (tr - 0.3) / 0.7))
-		ci.draw_polyline(_xf(path, center, s), Color(EDGE, 0.9), maxf(2.0, 3.5 * s), true)
+		ci.draw_polyline(_xf(path, center, s), Color(TRACE, 0.95), maxf(2.0, 3.5 * s), true)
 		if tr >= 1.0:
-			ci.draw_circle(center + (p2 - Vector2(50, 50)) * s, 4.0 * s, EDGE)
+			ci.draw_circle(center + (p2 - Vector2(50, 50)) * s, 4.5 * s, TRACE)
 	# barras das letras (primeiro todos os brilhos, depois as barras)
 	var shapes := []
 	for b in BARS:
@@ -94,7 +108,7 @@ static func draw_logo(ci: CanvasItem, center: Vector2, size: float, draw: float 
 		shapes.append([b[0], b[1], x1, y1])
 	if glow > 0.0:
 		for r in shapes:
-			ci.draw_colored_polygon(_xf(_rr(r[0] - 3, r[1] - 3, r[2] + 3, r[3] + 3, 7), center, s), BADGE_TOP.lerp(EDGE, 0.35 * glow))
+			ci.draw_colored_polygon(_xf(_rr(r[0] - 3, r[1] - 3, r[2] + 3, r[3] + 3, 7), center, s), Color("5a1fb8").lerp(Color("ff5fa2"), 0.5 * glow))
 	for r in shapes:
 		var pts := _xf(_rr(r[0], r[1], r[2], r[3], 4.5), center, s)
 		ci.draw_polygon(pts, _grad(pts, center.y + (14 - 50) * s, center.y + (88 - 50) * s, LETTER_TOP, LETTER_BOT))

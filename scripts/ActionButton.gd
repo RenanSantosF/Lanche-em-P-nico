@@ -67,5 +67,5 @@ func _draw() -> void:
 			D.fill_rrect(self, Rect2(ic.x - s * 0.7, ic.y - s * 0.8, s * 0.5, s * 1.6), s * 0.15, white)
 			D.fill_rrect(self, Rect2(ic.x + s * 0.2, ic.y - s * 0.8, s * 0.5, s * 1.6), s * 0.15, white)
 	if label != "":
-		D.text(self, Game.font, Vector2(r.position.x, r.end.y - 20), label, 24, white,
+		D.text(self, Game.font, Vector2(r.position.x, r.end.y - 20), L.t(label), D.fit(Game.font, L.t(label), 24, r.size.x - 10), white,
 			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 6, c.darkened(0.45))

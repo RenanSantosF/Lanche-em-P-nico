@@ -59,11 +59,11 @@ func _draw() -> void:
 	# dia
 	if vals["rush"]:
 		D.fill_rrect(self, Rect2(84, 12, 104, 56), 24, Color("ffd43b"))
-		D.text(self, f, Vector2(84, 40), "HORA DO", 15, Color("8f1d1d"), HORIZONTAL_ALIGNMENT_CENTER, 104)
-		D.text(self, f, Vector2(84, 61), "RUSH!", 24, Color("c92a2a"), HORIZONTAL_ALIGNMENT_CENTER, 104)
+		D.text(self, f, Vector2(84, 40), L.t("HORA DO"), 15, Color("8f1d1d"), HORIZONTAL_ALIGNMENT_CENTER, 104)
+		D.text(self, f, Vector2(84, 61), L.t("RUSH!"), 24, Color("c92a2a"), HORIZONTAL_ALIGNMENT_CENTER, 104)
 	else:
 		D.fill_rrect(self, Rect2(88, 16, 96, 48), 24, Color("ff8c42"))
-		D.text(self, f, Vector2(88, 49), "DIA %d" % vals["day"], 26, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, 96)
+		D.text(self, f, Vector2(88, 49), L.t("DIA %d") % vals["day"], D.fit(f, L.t("DIA %d") % vals["day"], 26, 90), Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, 96)
 	# relógio
 	var c := Vector2(222, 40)
 	draw_circle(c, 27, Color("fff3e0"))
@@ -79,14 +79,14 @@ func _draw() -> void:
 			pts.append(c + Vector2(cos(a), sin(a)) * 23.0)
 		draw_colored_polygon(pts, col)
 	draw_arc(c, 27, 0, TAU, 28, Color("3d1c06"), 3.0)
-	var label := "FIM" if vals["closing"] else str(vals["time"])
+	var label := L.t("FIM") if vals["closing"] else str(vals["time"])
 	D.text(self, f, Vector2(c.x - 28, c.y + 8), label, 20 if not vals["closing"] else 17, Color("3d1c06"), HORIZONTAL_ALIGNMENT_CENTER, 56, 5, Color(1, 1, 1, 0.85))
 	# meta do dia
 	var gx := 264.0
 	var gw := w - 196 - gx - 14
 	var goal: int = vals["goal"]
 	var earned: int = vals["earned"]
-	D.text(self, f, Vector2(gx, 30), "META", 17, Color("ffc9a3"))
+	D.text(self, f, Vector2(gx, 30), L.t("META"), 17, Color("ffc9a3"))
 	D.text(self, f, Vector2(gx, 30), "%d/%d" % [earned, goal], 17, Color.WHITE, HORIZONTAL_ALIGNMENT_RIGHT, gw)
 	var bar := Rect2(gx, 40, gw, 18)
 	D.fill_rrect(self, bar, 9, Color("3d1c06"))
@@ -112,12 +112,12 @@ func _draw() -> void:
 		var r := Rect2(12, y2, 150 * cp, 44 * cp)
 		D.fill_rrect(self, r, 22, Color("e8590c"))
 		D.draw_flame(self, r.position + Vector2(26 * cp, 34 * cp), 13 * cp)
-		D.text(self, f, Vector2(r.position.x + 40 * cp, r.position.y + 31 * cp), "COMBO x%d" % vals["combo"], int(22 * cp), Color.WHITE)
+		D.text(self, f, Vector2(r.position.x + 40 * cp, r.position.y + 31 * cp), L.t("COMBO x%d") % vals["combo"], int(22 * cp), Color.WHITE)
 	var line: int = vals["line"]
 	if line > 0:
 		var r := Rect2(w - 176, y2, 164, 44)
 		D.fill_rrect(self, r, 22, Color(0.24, 0.11, 0.02, 0.85))
-		D.text(self, f, Vector2(r.position.x + 14, r.position.y + 29), "FILA", 18, Color("ffc9a3"))
+		D.text(self, f, Vector2(r.position.x + 14, r.position.y + 29), L.t("FILA"), 18, Color("ffc9a3"))
 		var shown := mini(line, 4)
 		for i in shown:
 			var hc := Vector2(r.position.x + 74 + i * 18, r.position.y + 26)

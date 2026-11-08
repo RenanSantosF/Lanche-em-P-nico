@@ -316,7 +316,7 @@ func _draw_bubble(ci: Control) -> void:
 		bg = Color("eef6ff")
 	D.fill_rrect(ci, br, 20, bg)
 	ci.draw_colored_polygon(PackedVector2Array([Vector2(cw / 2 - 14, br.end.y - 1), Vector2(cw / 2 + 14, br.end.y - 1), Vector2(cw / 2, br.end.y + 18)]), bg)
-	D.text(ci, Game.font, Vector2(br.position.x, br.position.y + 26), recipe.get("name", ""), 19,
+	D.text(ci, Game.font, Vector2(br.position.x, br.position.y + 26), L.t(recipe.get("name", "")), D.fit(Game.font, L.t(recipe.get("name", "")), 19, br.size.x - 12),
 		Color("5c2c0c"), HORIZONTAL_ALIGNMENT_CENTER, br.size.x)
 	var has_sides := sides.size() > 0
 	var layers: Array = recipe.get("layers", [])
@@ -333,10 +333,10 @@ func _draw_bubble(ci: Control) -> void:
 	var tag := ""
 	var tag_col := Color()
 	if kind == "vip":
-		tag = "VIP x2"
+		tag = L.t("VIP x2")
 		tag_col = Color("e8a90c")
 	elif kind == "critic":
-		tag = "CRÍTICO"
+		tag = L.t("CRÍTICO")
 		tag_col = Color("c92a2a")
 	if tag != "":
 		var tr := Rect2(br.position.x - 4, br.position.y - 14, 92, 26)

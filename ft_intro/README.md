@@ -21,18 +21,19 @@ cena é esta intro animada (≈3 s, com jingle). Toque na tela pula a intro.
 2. Em **Projeto > Configurações do Projeto**:
    - `application/run/main_scene` = `res://ft_intro/FTIntro.tscn`
    - `application/boot_splash/show_image` = **desligado**
-   - `application/boot_splash/bg_color` = `#0b1020`
+   - `application/boot_splash/bg_color` = `#14082e`
 3. Abra `FTIntro.tscn` e mude **Next Scene** para a cena inicial do seu jogo.
 
 A próxima cena é carregada em segundo plano enquanto a intro roda, então a troca é instantânea.
 
 ## Cores da marca
 
-- Fundo: `#0b1020`
-- Placa: `#243b8f` → `#101a4d`
-- Contorno / circuito: `#22d3ee`
-- Letras: `#ffffff` → `#8be3ff`
-- Destaque (nó): `#ff9f1c`
+- Fundo: `#14082e`
+- Placa (degradê diagonal): `#ff006e` → `#8338ec` → `#3a86ff`
+- Contorno: `#ffbe0b`
+- Circuito / nó: `#00f5d4`
+- Letras: `#ffffff` → `#fff3b0`
+- Paleta de brilhos: `#ff006e`, `#ffbe0b`, `#00f5d4`, `#3a86ff`, `#fb5607`, `#8338ec`
 
 ## Regerar imagens, som e vídeos
 

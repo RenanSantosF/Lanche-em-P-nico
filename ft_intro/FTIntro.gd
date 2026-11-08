@@ -74,11 +74,11 @@ func _draw() -> void:
 	var step := logo_size / 4.0
 	var gx := fmod(center.x, step)
 	while gx < w:
-		draw_line(Vector2(gx, 0), Vector2(gx, h), Color(Logo.EDGE, grid_a), 1.0)
+		draw_line(Vector2(gx, 0), Vector2(gx, h), Color(Logo.TRACE, grid_a), 1.0)
 		gx += step
 	var gy := fmod(center.y, step)
 	while gy < h:
-		draw_line(Vector2(0, gy), Vector2(w, gy), Color(Logo.EDGE, grid_a), 1.0)
+		draw_line(Vector2(0, gy), Vector2(w, gy), Color(Logo.TRACE, grid_a), 1.0)
 		gy += step
 	var badge := ease_back((t - 0.1) / 0.45)
 	var drawp := clampf((t - 0.35) / 0.75, 0.0, 1.0)
@@ -87,7 +87,20 @@ func _draw() -> void:
 	# onda de choque quando o nó acende
 	if t > 1.0 and t < 1.7:
 		var k := (t - 1.0) / 0.7
-		draw_arc(center, logo_size * (0.5 + k * 0.7), 0, TAU, 64, Color(Logo.EDGE, 0.5 * (1.0 - k)), 3.0 + 6.0 * (1.0 - k), true)
+		draw_arc(center, logo_size * (0.5 + k * 0.7), 0, TAU, 64, Color(Logo.EDGE, 0.6 * (1.0 - k)), 3.0 + 6.0 * (1.0 - k), true)
+	# luz colorida atrás do logo
+	var halo := clampf((t - 0.3) / 0.8, 0.0, 1.0)
+	if halo > 0.0:
+		for k in 4:
+			var col: Color = Logo.PALETTE[(k + int(t * 2.0)) % Logo.PALETTE.size()]
+			draw_circle(center, logo_size * (0.95 - k * 0.12), Color(col, 0.05 * halo))
+	# explosão de pontinhos coloridos quando o nó acende
+	if t > 1.0 and t < 2.2:
+		var k2 := (t - 1.0) / 1.2
+		for i in 18:
+			var a := TAU * i / 18.0 + 0.3
+			var p := center + Vector2(cos(a), sin(a)) * logo_size * (0.55 + k2 * 0.6)
+			draw_circle(p, logo_size * 0.018 * (1.0 - k2), Color(Logo.PALETTE[i % Logo.PALETTE.size()], 1.0 - k2))
 	Logo.draw_logo(self, center, logo_size, drawp, badge, node, glow)
 	# brilhinhos
 	for s in _sparks:
@@ -95,7 +108,7 @@ func _draw() -> void:
 		if k > 0.0 and k < 1.0:
 			var p: Vector2 = center + Vector2(cos(s["a"]), sin(s["a"])) * logo_size * s["d"]
 			var r: float = logo_size * 0.05 * s["s"] * sin(k * PI)
-			Logo.draw_sparkle(self, p, r, Color(1, 1, 1, 0.9))
+			Logo.draw_sparkle(self, p, r, Logo.PALETTE[_sparks.find(s) % Logo.PALETTE.size()])
 	# fade de saída
 	var fade_out := clampf((t - (DURATION - 0.45)) / 0.45, 0.0, 1.0)
 	if fade_out > 0.0:

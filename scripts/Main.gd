@@ -15,6 +15,8 @@ const StarsScript = preload("res://scripts/StarsView.gd")
 const UpgradeIconScript = preload("res://scripts/UpgradeIcon.gd")
 const GrillScript = preload("res://scripts/Grill.gd")
 const XpBarScript = preload("res://scripts/XpBar.gd")
+const DragScroll = preload("res://scripts/DragScroll.gd")
+const GL = preload("res://scripts/GameLogo.gd")
 
 enum { MENU, PLAY, CLOSING, RESULTS, SHOP, PAUSED }
 
@@ -24,6 +26,17 @@ const GRILL_H := 110.0
 const TILE_H := 116.0
 const GAP := 10.0
 const MAX_LINE := 6
+
+
+class FlyIcon extends Control:
+	var item := 0
+	func _draw() -> void:
+		preload("res://scripts/Draw.gd").draw_icon(self, item, size / 2, size.x)
+
+
+class CoinFx extends Control:
+	func _draw() -> void:
+		preload("res://scripts/Draw.gd").draw_coin(self, size / 2, size.x * 0.45)
 
 
 class StarFx extends Control:
@@ -70,6 +83,7 @@ var pause_panel: PanelContainer
 var mode_panel: PanelContainer
 var shop_list: VBoxContainer
 var shop_coins: Label
+var shop_scroll
 
 # estado do dia
 var seats: Array = []
@@ -95,6 +109,7 @@ var work_h: float = WORK_H
 var tile_cols: int = 4
 var _menu_t: float = 0.0
 var _menu_acc: float = 0.0
+var _build_id: int = 0
 
 
 func _ready() -> void:
@@ -107,7 +122,7 @@ func _ready() -> void:
 	Game.coins_changed.connect(func(_v): _refresh_labels())
 	_show_menu()
 	Sfx.set_music(true)
-	if not Game.mode_chosen:
+	if not Game.lang_chosen:
 		_pop_panel(mode_panel)
 
 
@@ -175,7 +190,7 @@ func _make_theme() -> Theme:
 
 func _btn(text: String, color: Color = Color("ff8c42"), font_size: int = 32) -> Button:
 	var b := Button.new()
-	b.text = text
+	b.text = L.t(text)
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_font_size_override("font_size", font_size)
 	b.add_theme_stylebox_override("normal", _box(color))
@@ -187,7 +202,7 @@ func _btn(text: String, color: Color = Color("ff8c42"), font_size: int = 32) -> 
 
 func _label(text: String, fs: int, color: Color = Color("4a2a12"), outline: int = 0) -> Label:
 	var l := Label.new()
-	l.text = text
+	l.text = L.t(text)
 	l.add_theme_font_size_override("font_size", fs)
 	l.add_theme_color_override("font_color", color)
 	if outline > 0:
@@ -232,6 +247,7 @@ func _build_game() -> void:
 	grill.slot_tapped.connect(_on_grill_tap)
 	grill.patty_ready.connect(func(_i): Sfx.play("ready", 1.0, -3.0))
 	grill.patty_burnt.connect(_on_patty_burnt)
+	grill.cheese_done.connect(func(_i): Sfx.play("ready", 1.35, -8.0))
 	game_root.add_child(grill)
 
 	work_bg = _panel_rect(Color("c8d6df"))
@@ -441,6 +457,7 @@ func _build_menu() -> void:
 		b.custom_minimum_size = Vector2(0, 66)
 		row.add_child(b)
 	mode_btn.pressed.connect(func(): _pop_panel(mode_panel))
+	mode_btn.add_theme_font_size_override("font_size", 22)
 	sfx_btn.pressed.connect(func():
 		Game.sfx_on = not Game.sfx_on
 		Game.save_game()
@@ -463,45 +480,41 @@ func _process(delta: float) -> void:
 		_tick(delta)
 
 
+const MENU_TITLE := {"pt": ["LANCHE", "EM PÂNICO!"], "en": ["BURGER", "PANIC!"], "es": ["¡PÁNICO", "BURGER!"]}
+
+
 func _draw_menu_art() -> void:
 	var art := menu_art
 	var w := art.size.x
+	var h := art.size.y
 	var t := _menu_t
-	art.draw_rect(Rect2(0, 0, w, art.size.y), Color(0.2, 0.08, 0.02, 0.4))
+	art.draw_rect(Rect2(0, 0, w, h), Color(0.25, 0.06, 0.02, 0.45))
+	var avail := h - 560.0
+	var mc := Vector2(w / 2, clampf(300.0 + (avail - 300.0) * 0.5, 330.0, 520.0))
+	GL.draw_sunburst(art, mc, minf(w * 0.62, avail * 0.6), t * 0.25, Color(1.0, 0.72, 0.1, 0.55), Color(1.0, 0.45, 0.1, 0.35), 20)
+	var bob := sin(t * 3.0) * 8.0
+	D.draw_side(art, R.FRIES, mc + Vector2(-210, 70 + bob * 0.5), 150)
+	D.draw_side(art, R.SODA, mc + Vector2(215, 60 - bob * 0.5), 150)
+	GL.draw_mascot(art, mc + Vector2(0, 40 + bob), 250, t)
 	var f := Game.font
-	var title_y := 190.0 + sin(t * 2.0) * 6.0
-	D.text(art, f, Vector2(0, title_y), "LANCHE", 100, Color("ffd21f"), HORIZONTAL_ALIGNMENT_CENTER, w, 22, Color("5c2c0c"))
-	D.text(art, f, Vector2(0, title_y + 96), "EM PÂNICO!", 80, Color("ff6b6b"), HORIZONTAL_ALIGNMENT_CENTER, w, 22, Color("5c2c0c"))
-	var layers := [R.BUN_BOTTOM, R.LETTUCE, R.TOMATO, R.PATTY, R.CHEESE, R.BACON, R.EGG, R.BUN_TOP]
-	var cyc := fmod(t * 2.2, layers.size() + 5.0)
-	var shown := mini(int(cyc) + 1, layers.size())
-	var cx := w / 2
-	var base := minf(580.0, art.size.y - 600.0)
-	if base < 380.0:
-		return
-	art.draw_colored_polygon(D.ellipse(Vector2(cx, base + 6), 160, 28), Color(0, 0, 0, 0.25))
-	art.draw_colored_polygon(D.ellipse(Vector2(cx, base), 160, 26), Color("e9f1f6"))
-	var y := base - 4
-	for i in shown:
-		var bounce := 0.0
-		if i == shown - 1 and int(cyc) < layers.size():
-			bounce = -pow(1.0 - fmod(cyc, 1.0), 3) * 70.0
-		D.draw_layer(art, layers[i], cx, y + bounce, 210)
-		y -= D.layer_step(layers[i], 210)
+	var lines: Array = MENU_TITLE.get(Game.lang, MENU_TITLE["pt"])
+	var ty := 120.0 + sin(t * 2.0) * 4.0
+	D.text(art, f, Vector2(0, ty), lines[0], 96, Color("ffd21f"), HORIZONTAL_ALIGNMENT_CENTER, w, 24, Color("5c2c0c"))
+	D.text(art, f, Vector2(0, ty + 90), lines[1], 78, Color("ff4d6d"), HORIZONTAL_ALIGNMENT_CENTER, w, 24, Color("5c2c0c"))
 
 
 func _refresh_labels() -> void:
 	if menu_info:
 		var best_txt := ""
 		if Game.best_combo >= 2:
-			best_txt = "   •   Melhor combo x%d" % Game.best_combo
-		menu_info.text = "Dia %d   •   %d moedas%s" % [Game.day, Game.coins, best_txt]
-		mode_btn.text = "Modo: %s" % ("Fácil" if Game.easy else "Normal")
-		sfx_btn.text = "Sons: %s" % ("SIM" if Game.sfx_on else "NÃO")
-		music_btn.text = "Música: %s" % ("SIM" if Game.music_on else "NÃO")
+			best_txt = "   •   " + L.t("Melhor combo x%d") % Game.best_combo
+		menu_info.text = L.t("Dia %d") % Game.day + "   •   " + L.t("%d moedas") % Game.coins + best_txt
+		mode_btn.text = L.LANG_NAMES[Game.lang]
+		sfx_btn.text = L.t("Sons: %s") % L.t("SIM" if Game.sfx_on else "NÃO")
+		music_btn.text = L.t("Música: %s") % L.t("SIM" if Game.music_on else "NÃO")
 		menu_xp.set_xp(Game.xp)
 	if shop_coins:
-		shop_coins.text = "Moedas: %d   •   Nível %d (%s)" % [Game.coins, Game.level(), R.title_for_level(Game.level())]
+		shop_coins.text = L.t("Moedas: %d") % Game.coins + "   •   " + L.t("Nível %d") % Game.level() + " (" + L.t(R.title_for_level(Game.level())) + ")"
 
 
 func _show_menu() -> void:
@@ -545,26 +558,22 @@ func _build_overlays() -> void:
 	pb.add_child(quit)
 
 	var mb := mode_panel.get_child(0) as VBoxContainer
-	mb.add_child(_label("Como você quer jogar?", 38))
-	var easy := _btn("FÁCIL", Color("37b24d"), 34)
-	easy.custom_minimum_size = Vector2(0, 90)
-	easy.pressed.connect(_choose_mode.bind(true))
-	mb.add_child(easy)
-	mb.add_child(_label("Com dicas: o próximo ingrediente brilha e a comanda mostra o que está certo. Ótimo para crianças.", 20, Color("8a6a52")))
-	var normal := _btn("NORMAL", Color("e8590c"), 34)
-	normal.custom_minimum_size = Vector2(0, 90)
-	normal.pressed.connect(_choose_mode.bind(false))
-	mb.add_child(normal)
-	mb.add_child(_label("Sem dicas: preste atenção na comanda e na chapa. Mais desafio!", 20, Color("8a6a52")))
-	mb.add_child(_label("Dá pra trocar depois no menu.", 18, Color("adb5bd")))
+	mb.add_child(_label("Idioma  •  Language  •  Idioma", 32))
+	for code in ["pt", "en", "es"]:
+		var lb := _btn(L.LANG_NAMES[code], Color("37b24d") if code == Game.lang else Color("4dabf7"), 34)
+		lb.custom_minimum_size = Vector2(0, 90)
+		lb.pressed.connect(_choose_lang.bind(code))
+		mb.add_child(lb)
 
 	var sb := shop_panel.get_child(0) as VBoxContainer
 	sb.add_child(_label("Loja da Lanchonete", 40))
 	shop_coins = _label("", 22, Color("e8590c"))
 	sb.add_child(shop_coins)
-	var scroll := ScrollContainer.new()
+	var scroll := DragScroll.new()
+	shop_scroll = scroll
 	scroll.custom_minimum_size = Vector2(0, 780)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	sb.add_child(scroll)
 	shop_list = VBoxContainer.new()
 	shop_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -613,13 +622,17 @@ func _pop_panel(p: Control) -> void:
 	tw.tween_property(p, "modulate:a", 1.0, 0.12)
 
 
-func _choose_mode(easy: bool) -> void:
-	Game.easy = easy
-	Game.mode_chosen = true
+func _choose_lang(code: String) -> void:
+	Game.lang = code
+	Game.lang_chosen = true
 	Game.save_game()
-	mode_panel.visible = false
-	overlay.visible = false
-	_refresh_labels()
+	# reconstrói os textos fixos no idioma novo
+	for n in [menu_screen, overlay, results_panel, shop_panel, pause_panel, mode_panel]:
+		n.queue_free()
+	_build_menu()
+	_build_overlays()
+	move_child(fx, -1)
+	_show_menu()
 
 
 func _on_pause() -> void:
@@ -703,7 +716,7 @@ func _fill_shop() -> void:
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_theme_constant_override("separation", 0)
 		h.add_child(v)
-		var title_txt: String = u["name"]
+		var title_txt: String = L.t(u["name"])
 		var mt := R.max_tier(u)
 		if mt > 1:
 			var tr := R.tier(Game.owned, u["id"])
@@ -720,7 +733,7 @@ func _fill_shop() -> void:
 				b = _btn("TEM!", Color("37b24d"), 22)
 				b.disabled = true
 			"locked":
-				b = _btn("Nível %d" % nt["level"], Color("adb5bd"), 20)
+				b = _btn(L.t("Nível %d") % nt["level"], Color("adb5bd"), 20)
 				b.disabled = true
 			"poor":
 				b = _btn(str(nt["price"]), Color("adb5bd"), 26)
@@ -728,6 +741,7 @@ func _fill_shop() -> void:
 			_:
 				b = _btn(str(nt["price"]), Color("ffb31f"), 26)
 				b.pressed.connect(_buy.bind(u["id"]))
+				b.mouse_filter = Control.MOUSE_FILTER_PASS
 		b.custom_minimum_size = Vector2(124, 76)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(b)
@@ -735,6 +749,8 @@ func _fill_shop() -> void:
 
 
 func _buy(id: String) -> void:
+	if shop_scroll and shop_scroll.dragged:
+		return
 	if Game.buy(id):
 		Sfx.play("buy")
 		_burst_confetti(Vector2(size.x / 2, size.y / 2))
@@ -787,7 +803,8 @@ func _start_day() -> void:
 		_tutorial_banner()
 		_spawn_in_seat(0)
 	else:
-		_show_banner("DIA %d  •  Meta: %d moedas" % [Game.day, goal], 2.5)
+		_day_card()
+		spawn_t = 2.0
 
 
 func _clear_customers() -> void:
@@ -966,6 +983,13 @@ func _auto_select() -> void:
 
 
 # ------------------------------------------------------------------ ações
+func _tile_center(item: int) -> Vector2:
+	if tiles.has(item):
+		var b: Control = tiles[item]
+		return b.position + b.size / 2
+	return Vector2(size.x / 2, size.y - 100)
+
+
 func _on_tile(item: int) -> void:
 	if state != PLAY and state != CLOSING:
 		return
@@ -974,6 +998,14 @@ func _on_tile(item: int) -> void:
 			Sfx.play("sizzle")
 		else:
 			_nope("Chapa cheia!")
+		return
+	if item == R.CHEESE:
+		var slot: int = grill.add_cheese()
+		if slot >= 0:
+			Sfx.play("pop", 0.8)
+			_fly(R.CHEESE, _tile_center(R.CHEESE), grill.slot_center(slot), Callable())
+		else:
+			_nope("O cheddar derrete em cima da CARNE na chapa!")
 		return
 	if item == R.FRIES:
 		if built_sides.has(R.FRIES):
@@ -1008,24 +1040,29 @@ func _on_tile(item: int) -> void:
 	var layer := item
 	if item == R.BUN:
 		layer = R.BUN_BOTTOM if built.is_empty() else R.BUN_TOP
-	_add_layer(layer)
+	_add_layers([layer], _tile_center(item))
 
 
-func _add_layer(layer: int) -> void:
-	if built.size() >= 12:
+# A lógica muda na hora; o prato só mostra a camada quando o ingrediente "chega" voando.
+func _add_layers(layers: Array, from: Vector2) -> void:
+	if built.size() + layers.size() > 12:
 		_nope("")
 		return
-	built.append(layer)
-	Sfx.play("bun" if layer == R.BUN_BOTTOM or layer == R.BUN_TOP else "pop", 0.9 + built.size() * 0.05)
-	plate.set_build(built, built_sides)
+	built.append_array(layers)
+	var snap := built.duplicate()
+	var bid := _build_id
+	_refresh_build(false)
+	var target := plate.position + Vector2(plate.size.x / 2, plate.size.y - 70 - minf(snap.size() * 14.0, 150.0))
+	_fly(layers[0], from, target, _landed.bind(snap, bid))
+
+
+func _landed(snap: Array, bid: int) -> void:
+	if bid != _build_id:
+		return
+	var last: int = snap[-1]
+	Sfx.play("bun" if last == R.BUN_BOTTOM or last == R.BUN_TOP else "pop", 0.9 + snap.size() * 0.05)
+	plate.set_build(snap, built_sides)
 	plate.push_layer()
-	if Game.easy and selected != null and is_instance_valid(selected):
-		var want: Array = selected.recipe["layers"]
-		var k := built.size() - 1
-		if k >= want.size() or want[k] != layer:
-			plate.shake()
-			Sfx.play("nope", 1.2)
-	_refresh_build()
 
 
 func _on_grill_tap(i: int) -> void:
@@ -1044,8 +1081,14 @@ func _on_grill_tap(i: int) -> void:
 			if _is_closed():
 				_nope("Lanche fechado! Toque em ENTREGAR.")
 				return
-			grill.take(i)
-			_add_layer(R.PATTY)
+			var from: Vector2 = grill.slot_center(i)
+			var res: String = grill.take(i)
+			if res == "melting":
+				_nope("Cheddar ainda derretendo!")
+			elif res == "ready_cheese":
+				_add_layers([R.PATTY, R.CHEESE], from)
+			else:
+				_add_layers([R.PATTY], from)
 
 
 func _on_patty_burnt(_i: int) -> void:
@@ -1065,8 +1108,12 @@ func _is_closed() -> bool:
 	return built.size() > 0 and built[-1] == R.BUN_TOP
 
 
-func _refresh_build() -> void:
-	plate.set_build(built, built_sides)
+func _refresh_build(update_plate: bool = true) -> void:
+	if update_plate:
+		plate.set_build(built, built_sides)
+	else:
+		plate.sides = built_sides.duplicate()
+		plate.queue_redraw()
 	if selected != null and is_instance_valid(selected) and selected.mood == "wait":
 		ticket.show_order(selected.recipe, selected.sides, built, built_sides)
 	else:
@@ -1075,50 +1122,26 @@ func _refresh_build() -> void:
 	_update_hints()
 
 
+# Dicas só existem no tutorial: o jogo é sempre no modo Normal.
 func _update_hints() -> void:
 	var want_tile := -999
 	var want_slot := -1
-	var deliver := _is_closed()
-	var trash := false
-	if (Game.easy or tut < 99) and selected != null and is_instance_valid(selected):
-		var want: Array = selected.recipe["layers"]
-		var ok := true
-		for i in built.size():
-			if i >= want.size() or built[i] != want[i]:
-				ok = false
-		deliver = false
-		if not ok:
-			trash = true
-		elif built.size() < want.size():
-			var nxt: int = want[built.size()]
-			if nxt == R.BUN_BOTTOM or nxt == R.BUN_TOP:
-				want_tile = R.BUN
-			elif nxt == R.PATTY:
-				want_slot = grill.first_in_state("ready")
-				if want_slot == -1 and grill.count_state("raw") == 0:
-					want_tile = R.PATTY
-			else:
-				want_tile = nxt
-			# carne cozinha devagar: já sugere colocar na chapa no começo
-			if want.has(R.PATTY) and built.size() <= 1 and grill.count_state("raw") + grill.count_state("ready") == 0:
-				want_tile = R.PATTY
-		else:
-			var missing := false
-			for s in selected.sides:
-				if not built_sides.has(s):
-					missing = true
-					want_tile = s
-					break
-			deliver = not missing
-	if tut == 0:
-		want_tile = R.PATTY
-	elif tut == 1:
-		want_tile = R.BUN
+	match tut:
+		0:
+			want_tile = R.PATTY
+		1:
+			want_tile = R.BUN
+		2:
+			want_tile = R.CHEESE
+		3:
+			want_slot = grill.best_ready(1)
+		4:
+			want_tile = R.BUN
 	for it in tiles:
 		tiles[it].hint = it == want_tile
 	grill.hint_slot = want_slot
-	btn_deliver.glow = deliver
-	btn_trash.glow = trash
+	btn_deliver.glow = _is_closed()
+	btn_trash.glow = false
 
 
 func _on_trash() -> void:
@@ -1126,6 +1149,7 @@ func _on_trash() -> void:
 		return
 	built = []
 	built_sides = []
+	_build_id += 1
 	Sfx.play("trash")
 	plate.shake()
 	_refresh_build()
@@ -1167,13 +1191,12 @@ func _on_deliver() -> void:
 		stats["perfect"] += 1
 	Game.add_coins(earned)
 	Game.total_served += 1
-	top_bar.bump_coins()
 
 	var head: Vector2 = c.position + Vector2(c.size.x / 2, c.bubble_h + 40)
 	_burst_stars(head, stars)
 	if earned > 0:
 		_float_text(head + Vector2(0, -170), "+%d" % earned, Color("ffd21f"))
-		Sfx.play("coin", 1.0, -4.0)
+		_coins_fly(head + Vector2(0, -60), clampi(earned / 6 + 2, 2, 7))
 	if pay["tip"] > 0:
 		_float_text(head + Vector2(0, -115), "Gorjeta!", Color("69db7c"), 0.25)
 	match stars:
@@ -1181,7 +1204,7 @@ func _on_deliver() -> void:
 			Sfx.play("perfect")
 			var word: String = ["PERFEITO!", "DELÍCIA!", "UAU!", "SHOW!"].pick_random()
 			if combo >= 2:
-				word = "COMBO x%d!" % combo
+				word = L.t("COMBO x%d") % combo + "!"
 				Sfx.play("combo", 1.0 + mini(combo, 10) * 0.06)
 			_float_text(head + Vector2(0, -230), word, Color("ff922b"))
 			if combo >= 3 or c.kind != "normal":
@@ -1202,6 +1225,7 @@ func _on_deliver() -> void:
 
 	built = []
 	built_sides = []
+	_build_id += 1
 	if tut < 99:
 		tut = 99
 		Game.tutorial_done = true
@@ -1251,16 +1275,17 @@ func _seat_freed(i: int, c) -> void:
 # ------------------------------------------------------------------ tutorial
 const TUT_TEXT := [
 	"1. Toque em CARNE pra colocar na chapa",
-	"2. Enquanto assa, toque em PÃO",
-	"3. Carne PRONTA? Toque nela na chapa!",
-	"4. Siga a comanda e feche com o PÃO",
-	"5. Agora toque em ENTREGAR!",
+	"2. Toque em PÃO pra começar o lanche",
+	"3. Toque em CHEDDAR: ele derrete em cima da carne",
+	"4. Carne PRONTA e cheddar derretido? Toque nela!",
+	"5. Feche com o PÃO",
+	"6. Agora toque em ENTREGAR!",
 ]
 
 
 func _tutorial_banner() -> void:
 	if tut < TUT_TEXT.size():
-		banner.text = TUT_TEXT[tut]
+		banner.text = L.t(TUT_TEXT[tut])
 		banner.modulate.a = 1.0
 
 
@@ -1268,23 +1293,33 @@ func _tutorial_banner() -> void:
 func _tut_eval() -> void:
 	if tut >= 99:
 		return
+	var on_grill := false
+	var cheese := false
+	for i in grill.slots.size():
+		var st: String = grill.state_of(i)
+		if st == "raw" or st == "ready":
+			on_grill = true
+			if grill.has_cheese(i):
+				cheese = true
 	var step := 0
-	var on_grill: bool = grill.count_state("raw") + grill.count_state("ready") > 0
 	if not on_grill and not built.has(R.PATTY):
 		step = 0
 	elif built.is_empty():
 		step = 1
-	elif not built.has(R.PATTY):
+	elif not built.has(R.PATTY) and not cheese:
 		step = 2
-	elif not _is_closed():
+	elif not built.has(R.PATTY):
 		step = 3
-	else:
+	elif not _is_closed():
 		step = 4
+	else:
+		step = 5
 	if step != tut:
 		if step > tut:
 			Sfx.play("good", 1.2, -6.0)
 		tut = step
 		_tutorial_banner()
+		_update_hints()
 
 
 # ------------------------------------------------------------------ fim do dia
@@ -1312,19 +1347,19 @@ func _show_results(finished_day: int, day_stars: int, old_xp: int, bonus_xp: int
 		c.queue_free()
 	v.add_theme_constant_override("separation", 8)
 	var titles := ["Meta não batida...", "Dia concluído!", "Muito bem!", "INCRÍVEL!"]
-	v.add_child(_label("Fim do Dia %d" % finished_day, 26, Color("8a6a52")))
-	v.add_child(_label(titles[day_stars], 46, Color("e8590c") if day_stars > 0 else Color("c92a2a")))
+	v.add_child(_label(L.t("Fim do Dia %d") % finished_day, 26, Color("8a6a52")))
+	v.add_child(_label(L.t(titles[day_stars]), 46, Color("e8590c") if day_stars > 0 else Color("c92a2a")))
 	var sv := StarsScript.new()
 	sv.custom_minimum_size = Vector2(0, 120)
 	v.add_child(sv)
 	sv.reveal(day_stars)
-	v.add_child(_label("Moedas do dia: %d   (meta %d)" % [stats["coins"], goal], 28, Color("e8590c")))
+	v.add_child(_label(L.t("Moedas do dia: %d") % stats["coins"] + "   (" + L.t("meta %d") % goal + ")", 28, Color("e8590c")))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 20)
-	for l in ["Atendidos: %d" % stats["served"], "Perfeitos: %d" % stats["perfect"],
-			"Melhor combo: x%d" % stats["best_combo"], "Foram embora: %d" % stats["lost"],
-			"Gorjetas: %d" % stats["tips"], "Carnes queimadas: %d" % stats["burnt"]]:
+	for l in [L.t("Atendidos: %d") % stats["served"], L.t("Perfeitos: %d") % stats["perfect"],
+			L.t("Melhor combo: x%d") % stats["best_combo"], L.t("Foram embora: %d") % stats["lost"],
+			L.t("Gorjetas: %d") % stats["tips"], L.t("Carnes queimadas: %d") % stats["burnt"]]:
 		var lab := _label(l, 21)
 		lab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		grid.add_child(lab)
@@ -1332,14 +1367,14 @@ func _show_results(finished_day: int, day_stars: int, old_xp: int, bonus_xp: int
 	var xpb := XpBarScript.new()
 	xpb.custom_minimum_size = Vector2(0, 64)
 	v.add_child(xpb)
-	var xp_line := _label("+%d XP%s" % [Game.xp - old_xp, ("  (bônus de estrelas +%d)" % bonus_xp) if bonus_xp > 0 else ""], 20, Color("1971c2"))
+	var xp_line := _label("+%d XP" % (Game.xp - old_xp) + ((L.t("  (bônus de estrelas +%d)") % bonus_xp) if bonus_xp > 0 else ""), 20, Color("1971c2"))
 	v.add_child(xp_line)
 	var lvl_box := VBoxContainer.new()
 	v.add_child(lvl_box)
 	xpb.leveled_up.connect(_on_level_up.bind(lvl_box))
 	xpb.animate(old_xp, Game.xp, 1.2)
 	if day_stars == 0:
-		v.add_child(_label("Faltaram %d moedas. Dica: use a chapa antes do cliente chegar e faça combos!" % (goal - stats["coins"]), 20, Color("8a6a52")))
+		v.add_child(_label(L.t("Faltaram %d moedas. Dica: use a chapa antes do cliente chegar e faça combos!") % (goal - stats["coins"]), 20, Color("8a6a52")))
 	var shop := _btn("LOJA / EXPANDIR", Color("ff8c42"), 26)
 	shop.custom_minimum_size = Vector2(0, 72)
 	shop.pressed.connect(_open_shop)
@@ -1360,21 +1395,105 @@ func _show_results(finished_day: int, day_stars: int, old_xp: int, bonus_xp: int
 func _on_level_up(level: int, box: VBoxContainer) -> void:
 	Sfx.play("levelup")
 	_burst_confetti(Vector2(size.x / 2, size.y * 0.55))
-	var l := _label("SUBIU PRO NÍVEL %d: %s!" % [level, R.title_for_level(level)], 28, Color("2b8a3e"))
+	var l := _label(L.t("SUBIU PRO NÍVEL %d: %s!") % [level, L.t(R.title_for_level(level))], 28, Color("2b8a3e"))
 	box.add_child(l)
 	var un := R.unlocks_at_level(level)
 	if un.size() > 0:
-		box.add_child(_label("Liberado na loja: " + ", ".join(un), 20, Color("2b8a3e")))
+		box.add_child(_label(L.t("Liberado na loja: ") + ", ".join(un.map(func(x): return L.t(x))), 20, Color("2b8a3e")))
 	l.pivot_offset = Vector2(300, 20)
 	l.scale = Vector2(0.5, 0.5)
 	create_tween().tween_property(l, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 # ------------------------------------------------------------------ efeitos
+# Cartão animado de início do dia: "DIA N" + meta com as 3 estrelas.
+func _day_card() -> void:
+	var card := PanelContainer.new()
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	card.add_child(v)
+	v.add_child(_label(L.t("DIA %d") % Game.day, 64, Color("e8590c")))
+	v.add_child(_label(L.t("Meta: %d moedas") % goal, 30))
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 18)
+	for i in 3:
+		var at: int = [goal, int(goal * 1.5), goal * 2][i]
+		var b := VBoxContainer.new()
+		var st := StarFx.new()
+		st.radius = 20
+		st.custom_minimum_size = Vector2(48, 44)
+		b.add_child(st)
+		b.add_child(_label(str(at), 22, Color("8a6a52")))
+		row.add_child(b)
+	v.add_child(row)
+	for l in card.find_children("*", "Label", true, false):
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fx.add_child(card)
+	card.custom_minimum_size = Vector2(420, 0)
+	await get_tree().process_frame
+	if not is_instance_valid(card):
+		return
+	card.size = card.get_combined_minimum_size()
+	card.position = Vector2((size.x - card.size.x) / 2, size.y * 0.3)
+	card.pivot_offset = card.size / 2
+	card.scale = Vector2(0.3, 0.3)
+	var tw := create_tween()
+	tw.tween_property(card, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(1.4)
+	tw.set_parallel(true)
+	tw.tween_property(card, "position:y", card.position.y - 80, 0.3).set_ease(Tween.EASE_IN)
+	tw.tween_property(card, "modulate:a", 0.0, 0.3)
+	tw.set_parallel(false)
+	tw.tween_callback(card.queue_free)
+
+
+func _fly(item: int, from: Vector2, to: Vector2, done: Callable) -> void:
+	var f := FlyIcon.new()
+	f.item = item
+	f.size = Vector2(76, 76)
+	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	f.pivot_offset = f.size / 2
+	fx.add_child(f)
+	var mid := (from + to) / 2 + Vector2(0, -120)
+	var tw := create_tween()
+	tw.tween_method(_fly_step.bind(f, from, mid, to), 0.0, 1.0, 0.24).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.tween_callback(f.queue_free)
+	if done.is_valid():
+		tw.tween_callback(done)
+
+
+func _fly_step(k: float, f: Control, a: Vector2, m: Vector2, b: Vector2) -> void:
+	var p := a.lerp(m, k).lerp(m.lerp(b, k), k)
+	f.position = p - f.size / 2
+	f.scale = Vector2.ONE * (1.0 + sin(k * PI) * 0.25)
+	f.rotation = sin(k * PI) * 0.4
+
+
+func _coins_fly(from: Vector2, n: int) -> void:
+	var to := Vector2(size.x - 164, 40)
+	for i in n:
+		var c := CoinFx.new()
+		c.size = Vector2(34, 34)
+		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fx.add_child(c)
+		var start := from + Vector2(rng.randf_range(-40, 40), rng.randf_range(-30, 10))
+		var mid := start.lerp(to, 0.5) + Vector2(rng.randf_range(-80, 80), -80)
+		c.position = start
+		var tw := create_tween()
+		tw.tween_interval(i * 0.06)
+		tw.tween_method(_fly_step.bind(c, start, mid, to), 0.0, 1.0, 0.55).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+		tw.tween_callback(c.queue_free)
+		if i == n - 1:
+			tw.tween_callback(top_bar.bump_coins)
+			tw.tween_callback(Sfx.play.bind("coin", 1.0, -4.0))
+
+
 func _show_banner(text: String, hold: float = 1.8) -> void:
 	if tut < 99 and not text.begins_with("Isso"):
 		return
-	banner.text = text
+	banner.text = L.t(text)
 	banner.modulate.a = 0.0
 	var tw := create_tween()
 	tw.tween_property(banner, "modulate:a", 1.0, 0.15)
