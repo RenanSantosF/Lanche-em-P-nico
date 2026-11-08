@@ -191,7 +191,7 @@ func _process(delta: float) -> void:
 			patty_burnt.emit(i)
 	if active or hint_slot >= 0:
 		_acc += delta
-		if _acc >= 0.066:
+		if _acc >= 0.1:  # 10 quadros/s bastam para a chapa
 			_acc = 0.0
 			queue_redraw()
 

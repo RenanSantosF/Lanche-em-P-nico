@@ -17,6 +17,7 @@ const GrillScript = preload("res://scripts/Grill.gd")
 const XpBarScript = preload("res://scripts/XpBar.gd")
 const DragScroll = preload("res://scripts/DragScroll.gd")
 const GL = preload("res://scripts/GameLogo.gd")
+const Baked = preload("res://scripts/Baked.gd")
 
 enum { MENU, PLAY, CLOSING, RESULTS, SHOP, PAUSED }
 
@@ -90,6 +91,10 @@ var banner: Label
 var menu_screen: Control
 var menu_bg: Control
 var menu_art: Control
+var menu_sun
+var menu_mascot
+var menu_title
+var _mascot_y: float = 0.0
 var menu_xp: Control
 var menu_info: Label
 var mode_btn: Button
@@ -447,11 +452,28 @@ func _build_menu() -> void:
 	menu_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	menu_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	menu_screen.add_child(menu_bg)
+	# Arte do menu "assada" em texturas: raios giram, mascote e título balançam
+	# só por transformação (sem redesenhar 30x por segundo como antes).
 	menu_art = Control.new()
 	menu_art.set_anchors_preset(Control.PRESET_FULL_RECT)
 	menu_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	menu_art.draw.connect(_draw_menu_art)
 	menu_screen.add_child(menu_art)
+	var shade := ColorRect.new()
+	shade.color = Color(0.25, 0.06, 0.02, 0.45)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	menu_art.add_child(shade)
+	menu_sun = Baked.new()
+	menu_sun.setup(self, "_bake_sun")
+	menu_art.add_child(menu_sun)
+	menu_mascot = Baked.new()
+	menu_mascot.setup(self, "_bake_mascot", 20.0)
+	menu_art.add_child(menu_mascot)
+	menu_title = Baked.new()
+	menu_title.setup(self, "_bake_title", 30.0)
+	menu_art.add_child(menu_title)
+	menu_art.resized.connect(_layout_menu_art)
+	_layout_menu_art.call_deferred()
 
 	var box := VBoxContainer.new()
 	box.anchor_left = 0.5
@@ -540,9 +562,12 @@ func _process(delta: float) -> void:
 	if state == MENU:
 		_menu_t += delta
 		_menu_acc += delta
-		if _menu_acc >= 1.0 / 30.0:
+		menu_sun.rotation += delta * 0.25
+		menu_mascot.position.y = _mascot_y + sin(_menu_t * 3.0) * 8.0
+		menu_title.position.y = 20.0 + sin(_menu_t * 2.0) * 4.0
+		if _menu_acc >= 0.2:  # mascote mexe os braços a 5 quadros/s (barato)
 			_menu_acc = 0.0
-			menu_art.queue_redraw()
+			menu_mascot.refresh()
 	elif state == PLAY or state == CLOSING:
 		_tick(delta)
 
@@ -550,24 +575,39 @@ func _process(delta: float) -> void:
 const MENU_TITLE := {"pt": ["LANCHE", "EM PÂNICO!"], "en": ["BURGER", "PANIC!"], "es": ["¡PÁNICO", "BURGER!"]}
 
 
-func _draw_menu_art() -> void:
-	var art := menu_art
-	var w := art.size.x
-	var h := art.size.y
-	var t := _menu_t
-	art.draw_rect(Rect2(0, 0, w, h), Color(0.25, 0.06, 0.02, 0.45))
+func _layout_menu_art() -> void:
+	var w := menu_art.size.x
+	var h := menu_art.size.y
 	var avail := h - 560.0
 	var mc := Vector2(w / 2, clampf(300.0 + (avail - 300.0) * 0.5, 330.0, 520.0))
-	GL.draw_sunburst(art, mc, minf(w * 0.62, avail * 0.6), t * 0.25, Color(1.0, 0.72, 0.1, 0.55), Color(1.0, 0.45, 0.1, 0.35), 20)
-	var bob := sin(t * 3.0) * 8.0
-	D.draw_side(art, R.FRIES, mc + Vector2(-210, 70 + bob * 0.5), 150)
-	D.draw_side(art, R.SODA, mc + Vector2(215, 60 - bob * 0.5), 150)
-	GL.draw_mascot(art, mc + Vector2(0, 40 + bob), 250, t)
-	var f := Game.font
+	var r := minf(w * 0.62, avail * 0.6)
+	menu_sun.size = Vector2(r * 2, r * 2)
+	menu_sun.position = mc - Vector2(r, r)
+	menu_sun.pivot_offset = Vector2(r, r)
+	menu_mascot.size = Vector2(600, 440)
+	_mascot_y = mc.y + 40 - 220
+	menu_mascot.position = Vector2(mc.x - 300, _mascot_y)
+	menu_title.size = Vector2(w, 220)
+	menu_title.position = Vector2(0, 20)
+
+
+func _bake_sun(ci: Control) -> void:
+	GL.draw_sunburst(ci, ci.size / 2, ci.size.x / 2, 0.0, Color(1.0, 0.72, 0.1, 0.55), Color(1.0, 0.45, 0.1, 0.35), 20)
+
+
+func _bake_mascot(ci: Control) -> void:
+	var c := ci.size / 2
+	var wave := sin(_menu_t * 3.0) * 4.0
+	D.draw_side(ci, R.FRIES, c + Vector2(-210, 30 + wave), 150)
+	D.draw_side(ci, R.SODA, c + Vector2(215, 20 - wave), 150)
+	GL.draw_mascot(ci, c, 250, _menu_t)
+
+
+func _bake_title(ci: Control) -> void:
 	var lines: Array = MENU_TITLE.get(Game.lang, MENU_TITLE["pt"])
-	var ty := 120.0 + sin(t * 2.0) * 4.0
-	D.text(art, f, Vector2(0, ty), lines[0], 96, Color("ffd21f"), HORIZONTAL_ALIGNMENT_CENTER, w, 24, Color("5c2c0c"))
-	D.text(art, f, Vector2(0, ty + 90), lines[1], 78, Color("ff4d6d"), HORIZONTAL_ALIGNMENT_CENTER, w, 24, Color("5c2c0c"))
+	var w := ci.size.x
+	D.text(ci, Game.font, Vector2(0, 100), lines[0], 96, Color("ffd21f"), HORIZONTAL_ALIGNMENT_CENTER, w, 24, Color("5c2c0c"))
+	D.text(ci, Game.font, Vector2(0, 190), lines[1], 78, Color("ff4d6d"), HORIZONTAL_ALIGNMENT_CENTER, w, 24, Color("5c2c0c"))
 
 
 func _refresh_labels() -> void:

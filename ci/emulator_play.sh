@@ -62,7 +62,7 @@ print(int(wy + work_h + GAP + 6 + tile_h / 2), int(wy - GRILL + GRILL / 2), int(
 EOF
 )
 echo "tiles y=$TILE_Y grill y=$GRILL_Y entregar y=$DELIVER_Y"
-X_PAO=94; X_CARNE=271; X_CHEDDAR=449; X_GRILL0=323
+X_PAO=94; X_CARNE=271; X_CHEDDAR=449; X_GRILL0=408
 
 tap $X_CARNE "$TILE_Y" 1          # carne na chapa (deve ir para UMA chapa só)
 shot 04_carne

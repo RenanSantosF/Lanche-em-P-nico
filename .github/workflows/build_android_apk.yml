@@ -13,7 +13,7 @@ env:
   ANDROID_PLATFORM: android-36
   BUILD_TOOLS: 36.1.0
   NDK_VERSION: 29.0.14206865
-  VERSION_NAME: 3.2.0
+  VERSION_NAME: 3.3.0
 
 jobs:
   build:
