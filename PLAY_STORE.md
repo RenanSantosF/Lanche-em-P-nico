@@ -1,5 +1,33 @@
 # Publicar o Lanche em Pânico na Google Play
 
+## Ficha resumo (copie e cole na Play Console)
+
+| Campo | Valor |
+|---|---|
+| **Nome do pacote (ID do app)** | `com.ferreiratecnologia.lancheempanico` — permanente, não muda depois de publicar |
+| **Nome do app** | Lanche em Pânico (EN: Burger Panic · ES: Pánico Burger) |
+| **Desenvolvedor** | Ferreira Tecnologia (FT) |
+| **Versão atual** | 3.3.0 (o `versionCode` sobe sozinho a cada build: 100 + número do build) |
+| **Tipo / preço** | Jogo · Gratuito · Contém anúncios |
+| **Categoria** | Jogos → Casual |
+| **Classificação indicativa** | Livre / Everyone (questionário IARC: sem violência, sem compras, com anúncios) |
+| **Público-alvo recomendado** | 13 anos ou mais (evita as regras extras do programa Família) |
+| **Idiomas** | Português (Brasil), Inglês, Espanhol |
+| **Android mínimo / alvo** | Android 7.0 (API 24) / Android 16 (API 36) |
+| **Arquivo para a loja** | `lanche-em-panico.aab` (Release no GitHub, gerado quando os secrets da chave existem) |
+| **Assinatura** | Chave de upload `lanche-upload.jks`, alias `lanche` + Assinatura de apps do Google Play |
+| **Política de privacidade** | `https://renansantosf.github.io/Lanche-em-P-nico/privacy.html` |
+| **AdMob – ID do app** | `ca-app-pub-4311255826061303~4157782489` |
+| **AdMob – Intersticial "A cada fase"** | `ca-app-pub-4311255826061303/7993085719` |
+| **AdMob – Premiado "Recompensa"** | `ca-app-pub-4311255826061303/7320353635` |
+| **ID de publicidade** | Sim, usado para anúncios |
+| **Permissões** | Internet, estado da rede, vibrar (+ AD_ID adicionada pelo SDK de anúncios) |
+| **Ícone** | `store/play_icon_512.png` |
+| **Gráfico de destaque** | `store/feature_graphic_1024x500.png` |
+| **Capturas** | `store/screenshots/` (pt_, en_, es_) |
+| **Textos da ficha** | No fim deste arquivo (PT, EN, ES) |
+
+
 Tudo o que dá para automatizar já está pronto no repositório. Este guia mostra o que **só você** pode fazer (conta, pagamento, formulários da Play Console) e onde está cada material.
 
 ## O que já está pronto
@@ -93,13 +121,16 @@ A fila não para e os clientes estão com fome! Em Lanche em Pânico você coman
 Siga a comanda de baixo para cima: pão, carne, cheddar, alface, tomate, bacon, ovo, cebola, picles... Lanche perfeito vale 3 estrelas. Errou? Ganha menos!
 
 🔥 A CHAPA NÃO PERDOA
-A carne leva tempo para assar e queima se você esquecer. O cheddar derrete em cima da carne, na chapa. Planeje, faça várias coisas ao mesmo tempo e não deixe queimar!
+Você começa com uma chapa só! A carne leva tempo para assar e queima se você esquecer. O cheddar derrete em cima da carne, na chapa. Planeje, faça várias coisas ao mesmo tempo e não deixe queimar!
+
+😰 CLIENTE GRITANDO, CHEF NERVOSO
+Demorou? O cliente grita "Anda logo!" e você fica nervoso: a tela treme, o coração acelera e as mãos tremem. Capriche num lanche perfeito para se acalmar!
 
 ⭐ METAS, COMBOS E HORA DO RUSH
 Bata a meta de cada dia para avançar. Encadeie lanches perfeitos para fazer combos e ganhar mais. Cuidado com a Hora do Rush, os clientes VIP apressados e o crítico exigente!
 
 🏪 EXPANDA SUA LANCHONETE
-Suba de nível de Aprendiz até Lenda do Lanche. Compre ingredientes novos, chapa maior e turbo, fritadeira, máquina de refri, mais bancos, decoração e letreiro neon. A lanchonete muda de visual conforme evolui.
+Suba de nível de Aprendiz até Lenda do Lanche. Compre ingredientes novos, mais chapas, chapa turbo, exaustor, ajudante de chapa, fritadeira, máquina de refri, mais bancos, TV, panfletos, chá de camomila, decoração e letreiro neon. A lanchonete muda de visual conforme evolui.
 
 ✨ PARA TODA A FAMÍLIA
 Visual colorido, controles simples, tutorial no primeiro dia e partidas rápidas. Leve, roda bem até em celulares simples. Em português, inglês e espanhol.
@@ -120,13 +151,16 @@ The line never stops and the customers are hungry! In Burger Panic you run the g
 Follow the ticket from the bottom up: bun, patty, cheddar, lettuce, tomato, bacon, egg, onion, pickles... A perfect burger earns 3 stars. Make a mistake and you earn less!
 
 🔥 THE GRILL IS UNFORGIVING
-Patties take time to cook and burn if you forget them. Cheddar melts on top of the patty, right on the grill. Plan ahead, multitask and don't let anything burn!
+You start with a single grill! Patties take time to cook and burn if you forget them. Cheddar melts on top of the patty, right on the grill. Plan ahead, multitask and don't let anything burn!
 
 ⭐ GOALS, COMBOS AND RUSH HOUR
 Hit each day's goal to move on. Chain perfect burgers for combos and bigger payouts. Watch out for Rush Hour, hurried VIP customers and the picky critic!
 
+😰 YELLING CUSTOMERS, NERVOUS CHEF
+Too slow? Customers yell "Hurry up!" and you get nervous: the screen shakes, your heart races and your hands tremble. Nail a perfect burger to calm down!
+
 🏪 EXPAND YOUR DINER
-Level up from Apprentice to Burger Legend. Buy new ingredients, a bigger and turbo grill, a fryer, a soda machine, more stools, decorations and a neon sign. Your diner's look changes as it grows.
+Level up from Apprentice to Burger Legend. Buy new ingredients, more grills, a turbo grill, an exhaust hood, a grill helper, a fryer, a soda machine, more stools, a TV, flyers, chamomile tea, decorations and a neon sign. Your diner's look changes as it grows.
 
 ✨ FUN FOR THE WHOLE FAMILY
 Colorful art, simple controls, a first-day tutorial and quick sessions. Lightweight, runs well even on low-end phones. In English, Portuguese and Spanish.
@@ -147,13 +181,16 @@ Free game with ads.
 Sigue la comanda de abajo hacia arriba: pan, carne, cheddar, lechuga, tomate, bacon, huevo, cebolla, pepinillos... Una hamburguesa perfecta vale 3 estrellas. ¿Te equivocaste? ¡Ganas menos!
 
 🔥 LA PLANCHA NO PERDONA
-La carne tarda en hacerse y se quema si la olvidas. El cheddar se derrite sobre la carne, en la plancha. ¡Planifica, haz varias cosas a la vez y no dejes que se queme!
+¡Empiezas con una sola plancha! La carne tarda en hacerse y se quema si la olvidas. El cheddar se derrite sobre la carne, en la plancha. ¡Planifica, haz varias cosas a la vez y no dejes que se queme!
 
 ⭐ METAS, COMBOS Y HORA PUNTA
 Cumple la meta de cada día para avanzar. Encadena hamburguesas perfectas para hacer combos y ganar más. ¡Cuidado con la Hora Punta, los clientes VIP con prisa y el crítico exigente!
 
+😰 CLIENTES GRITANDO, CHEF NERVIOSO
+¿Tardaste? El cliente grita "¡Apúrate!" y te pones nervioso: la pantalla tiembla, el corazón se acelera y las manos tiemblan. ¡Haz una hamburguesa perfecta para calmarte!
+
 🏪 AMPLÍA TU LOCAL
-Sube de nivel de Aprendiz a Leyenda Burger. Compra ingredientes nuevos, una plancha más grande y turbo, freidora, máquina de refrescos, más taburetes, decoración y un letrero de neón. Tu local cambia de aspecto mientras crece.
+Sube de nivel de Aprendiz a Leyenda Burger. Compra ingredientes nuevos, más planchas, plancha turbo, extractor, ayudante de plancha, freidora, máquina de refrescos, más taburetes, TV, volantes, té de manzanilla, decoración y un letrero de neón. Tu local cambia de aspecto mientras crece.
 
 ✨ PARA TODA LA FAMILIA
 Gráficos coloridos, controles sencillos, tutorial el primer día y partidas rápidas. Ligero, funciona bien incluso en móviles sencillos. En español, portugués e inglés.
