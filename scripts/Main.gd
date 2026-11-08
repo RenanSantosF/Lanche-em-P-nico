@@ -564,6 +564,10 @@ func _build_overlays() -> void:
 		lb.custom_minimum_size = Vector2(0, 90)
 		lb.pressed.connect(_choose_lang.bind(code))
 		mb.add_child(lb)
+	if Ads.privacy_options_required():
+		var pv := _btn("Privacidade dos anúncios", Color("868e96"), 24)
+		pv.pressed.connect(Ads.show_privacy_options)
+		mb.add_child(pv)
 
 	var sb := shop_panel.get_child(0) as VBoxContainer
 	sb.add_child(_label("Loja da Lanchonete", 40))
@@ -692,6 +696,8 @@ func _fill_shop() -> void:
 		var na := R.next_tier(Game.owned, a)
 		var nb := R.next_tier(Game.owned, b)
 		return int(na.get("price", 0)) < int(nb.get("price", 0)))
+	if Ads.rewarded_ready():
+		_add_video_row()
 	for u in items:
 		var st := Game.buy_state(u)
 		var nt := R.next_tier(Game.owned, u)
@@ -746,6 +752,59 @@ func _fill_shop() -> void:
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(b)
 		shop_list.add_child(row)
+
+
+const VIDEO_COOLDOWN_MS := 180000
+var _last_video_ms := -VIDEO_COOLDOWN_MS
+
+
+func _video_reward() -> int:
+	return 20 + Game.day * 6
+
+
+func _add_video_row() -> void:
+	if not Ads.enabled:
+		return
+	var row := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color("f3f0ff")
+	sb.set_corner_radius_all(20)
+	sb.content_margin_left = 10
+	sb.content_margin_right = 10
+	sb.content_margin_top = 8
+	sb.content_margin_bottom = 8
+	row.add_theme_stylebox_override("panel", sb)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	row.add_child(h)
+	var title := _label(L.t("Moedas grátis! Assista um vídeo e ganhe %d moedas.") % _video_reward(), 22)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(title)
+	var wait := Time.get_ticks_msec() - _last_video_ms < VIDEO_COOLDOWN_MS
+	var b := _btn(L.t("ASSISTIR") if not wait else L.t("Daqui a pouco"), Color("7048e8") if not wait else Color("adb5bd"), 22)
+	b.disabled = wait
+	b.custom_minimum_size = Vector2(150, 76)
+	b.mouse_filter = Control.MOUSE_FILTER_PASS
+	b.pressed.connect(_on_video_coins)
+	h.add_child(b)
+	shop_list.add_child(row)
+
+
+func _on_video_coins() -> void:
+	if shop_scroll and shop_scroll.dragged:
+		return
+	var amount := _video_reward()
+	Ads.show_rewarded(func(got: bool) -> void:
+		if got:
+			_last_video_ms = Time.get_ticks_msec()
+			Game.add_coins(amount)
+			Game.save_game()
+			Sfx.play("buy")
+			_burst_confetti(Vector2(size.x / 2, size.y / 2))
+		if shop_panel.visible:
+			_fill_shop()
+			_refresh_labels())
 
 
 func _buy(id: String) -> void:
@@ -1375,13 +1434,18 @@ func _show_results(finished_day: int, day_stars: int, old_xp: int, bonus_xp: int
 	xpb.animate(old_xp, Game.xp, 1.2)
 	if day_stars == 0:
 		v.add_child(_label(L.t("Faltaram %d moedas. Dica: use a chapa antes do cliente chegar e faça combos!") % (goal - stats["coins"]), 20, Color("8a6a52")))
+	if stats["coins"] > 0 and Ads.rewarded_ready():
+		var dbl := _btn(L.t("VÍDEO: DOBRAR MOEDAS (+%d)") % stats["coins"], Color("7048e8"), 24)
+		dbl.custom_minimum_size = Vector2(0, 72)
+		dbl.pressed.connect(_on_double_coins.bind(dbl))
+		v.add_child(dbl)
 	var shop := _btn("LOJA / EXPANDIR", Color("ff8c42"), 26)
 	shop.custom_minimum_size = Vector2(0, 72)
 	shop.pressed.connect(_open_shop)
 	v.add_child(shop)
 	var nxt := _btn("PRÓXIMO DIA" if day_stars > 0 else "TENTAR DE NOVO", Color("37b24d"), 34)
 	nxt.custom_minimum_size = Vector2(0, 88)
-	nxt.pressed.connect(_start_day)
+	nxt.pressed.connect(_next_day_with_ad)
 	v.add_child(nxt)
 	var menu := _btn("MENU", Color("4dabf7"), 22)
 	menu.pressed.connect(_show_menu)
@@ -1390,6 +1454,27 @@ func _show_results(finished_day: int, day_stars: int, old_xp: int, bonus_xp: int
 	if day_stars == 3:
 		_burst_confetti(Vector2(size.x / 2, size.y * 0.3))
 	_pop_panel(results_panel)
+
+
+func _next_day_with_ad() -> void:
+	# intersticial "A cada fase" (com limite de frequência) e depois começa o dia
+	_hide_overlays()
+	Ads.maybe_interstitial(Game.day, _start_day)
+
+
+func _on_double_coins(btn: Button) -> void:
+	btn.disabled = true
+	var amount: int = stats["coins"]
+	Ads.show_rewarded(func(got: bool) -> void:
+		if got:
+			Game.add_coins(amount)
+			Game.save_game()
+			Sfx.play("buy")
+			_burst_confetti(Vector2(size.x / 2, size.y / 2))
+			if is_instance_valid(btn):
+				btn.text = L.t("MOEDAS DOBRADAS! +%d") % amount
+		elif is_instance_valid(btn):
+			btn.disabled = false)
 
 
 func _on_level_up(level: int, box: VBoxContainer) -> void:

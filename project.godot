@@ -1,28 +1,40 @@
 ; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
+
+[admob]
+
+general/android/app_id="ca-app-pub-4311255826061303~4157782489"
 
 [application]
 
 config/name="Lanche em Pânico"
-config/description="Monte os lanches do jeito que o cliente pediu, ganhe estrelas e expanda sua lanchonete!"
-run/main_scene="res://ft_intro/FTIntro.tscn"
-config/features=PackedStringArray("4.3", "GL Compatibility")
 config/name_localized={
 "en": "Burger Panic",
 "es": "Pánico Burger",
 "pt": "Lanche em Pânico"
 }
-config/icon="res://icon.png"
+config/description="Monte os lanches do jeito que o cliente pediu, ganhe estrelas e expanda sua lanchonete!"
+run/main_scene="res://ft_intro/FTIntro.tscn"
 config/quit_on_go_back=false
+config/features=PackedStringArray("4.7", "GL Compatibility")
 run/max_fps=60
 boot_splash/bg_color=Color(0.0784314, 0.0313726, 0.180392, 1)
 boot_splash/show_image=false
+config/icon="res://icon.png"
 
 [autoload]
 
 Game="*res://autoload/Game.gd"
 L="*res://autoload/L.gd"
 Sfx="*res://autoload/Sfx.gd"
+Ads="*res://autoload/Ads.gd"
 
 [display]
 
@@ -30,14 +42,13 @@ window/size/viewport_width=720
 window/size/viewport_height=1280
 window/size/window_width_override=405
 window/size/window_height_override=720
-window/handheld/orientation=1
-window/energy_saving/keep_screen_on=true
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=1
 
-[input_devices]
+[editor_plugins]
 
-pointing/emulate_touch_from_mouse=false
+enabled=PackedStringArray("res://addons/admob/plugin.cfg")
 
 [physics]
 

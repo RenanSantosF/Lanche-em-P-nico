@@ -1,3 +1,7 @@
 .godot/
 build/
 *.apk
+android/
+addons/admob/downloads/
+*.jks
+*.keystore

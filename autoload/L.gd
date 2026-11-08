@@ -68,6 +68,9 @@ const EN := {
 	"Chef Estrela": "Star Chef", "Mestre do Lanche": "Burger Master", "Grão-Mestre": "Grandmaster",
 	"Lenda do Lanche": "Burger Legend", "Do Meu Jeito": "My Way", "ENTREGAR": "SERVE", "LIXO": "TRASH",
 	"Toque para jogar": "Tap to play",
+	"VÍDEO: DOBRAR MOEDAS (+%d)": "VIDEO: DOUBLE COINS (+%d)", "MOEDAS DOBRADAS! +%d": "COINS DOUBLED! +%d",
+	"Moedas grátis! Assista um vídeo e ganhe %d moedas.": "Free coins! Watch a video and get %d coins.",
+	"ASSISTIR": "WATCH", "Daqui a pouco": "Soon", "Privacidade dos anúncios": "Ad privacy",
 }
 
 const ES := {
@@ -134,6 +137,9 @@ const ES := {
 	"Chef Estrela": "Chef Estrella", "Mestre do Lanche": "Maestro Burger", "Grão-Mestre": "Gran Maestro",
 	"Lenda do Lanche": "Leyenda Burger", "Do Meu Jeito": "A Mi Manera", "ENTREGAR": "ENTREGAR", "LIXO": "BASURA",
 	"Toque para jogar": "Toca para jugar",
+	"VÍDEO: DOBRAR MOEDAS (+%d)": "VIDEO: DUPLICAR MONEDAS (+%d)", "MOEDAS DOBRADAS! +%d": "¡MONEDAS DUPLICADAS! +%d",
+	"Moedas grátis! Assista um vídeo e ganhe %d moedas.": "¡Monedas gratis! Mira un video y gana %d monedas.",
+	"ASSISTIR": "VER", "Daqui a pouco": "En un rato", "Privacidade dos anúncios": "Privacidad de anuncios",
 }
 
 
