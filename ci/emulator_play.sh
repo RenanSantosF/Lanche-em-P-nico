@@ -79,9 +79,15 @@ tap 644 "$DELIVER_Y" 3             # entregar
 shot 08_entregue
 alive "entrega"
 
-# deixa o jogo rodar (clientes, sons, anúncios carregando)
-for i in 1 2 3 4; do
-  tap $X_CARNE "$TILE_Y" 4
+# joga de verdade por ~90s: carne, pão, cheddar, pega a carne, fecha e entrega
+for i in 1 2 3 4 5 6; do
+  tap $X_CARNE "$TILE_Y" 0.4
+  tap $X_PAO "$TILE_Y" 0.4
+  tap $X_CHEDDAR "$TILE_Y" 0.4
+  sleep 7
+  tap $X_GRILL0 "$GRILL_Y" 0.6
+  tap $X_PAO "$TILE_Y" 0.6
+  tap 644 "$DELIVER_Y" 2
   alive "jogando $i"
 done
 shot 09_jogando
@@ -92,6 +98,8 @@ shot 10_fim
 adb logcat -d > diag/logcat.txt
 echo "=== trechos importantes do logcat ==="
 echo "toques duplicados ignorados: $(grep -c 'toque duplicado' diag/logcat.txt)"
+echo "=== desempenho ==="
+grep "\[LP\] perf" diag/logcat.txt | sed 's/.*\[LP\]/[LP]/' || true
 grep -E "FATAL|SIGSEGV|SIGABRT|backtrace|Abort message|godot.*(ERROR|SCRIPT)|E godot|USER ERROR|\[LP\]|Ads" diag/logcat.txt | head -120 || true
 echo "=== fim ==="
 exit 0

@@ -479,7 +479,35 @@ func _build_menu() -> void:
 		_refresh_labels())
 
 
+# ---- medição de desempenho (vai para o logcat com a tag [LP]) ----
+var _pf_t := 0.0
+var _pf_frames := 0
+var _pf_worst := 0.0
+var _pf_hitch := 0
+var _pf_proc := 0.0
+
+
+func _perf(delta: float) -> void:
+	_pf_t += delta
+	_pf_frames += 1
+	_pf_worst = maxf(_pf_worst, delta)
+	if delta > 0.05:
+		_pf_hitch += 1
+	_pf_proc += Performance.get_monitor(Performance.TIME_PROCESS)
+	if _pf_t >= 5.0:
+		print("[LP] perf fps=%.1f pior=%dms travadas=%d process=%.2fms draws=%d nos=%d estado=%d" % [
+			_pf_frames / _pf_t, int(_pf_worst * 1000.0), _pf_hitch, _pf_proc / _pf_frames * 1000.0,
+			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+			Performance.get_monitor(Performance.OBJECT_NODE_COUNT), state])
+		_pf_t = 0.0
+		_pf_frames = 0
+		_pf_worst = 0.0
+		_pf_hitch = 0
+		_pf_proc = 0.0
+
+
 func _process(delta: float) -> void:
+	_perf(delta)
 	if state == MENU:
 		_menu_t += delta
 		_menu_acc += delta
