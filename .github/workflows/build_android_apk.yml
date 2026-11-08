@@ -66,12 +66,11 @@ jobs:
           sudo chmod +x /usr/local/bin/godot
           godot --version
 
-      - name: Chave de debug e configurações do editor
+      - name: Chave de teste fixa e configurações do editor
         run: |
           mkdir -p ~/.android ~/.config/godot
-          keytool -keyalg RSA -genkeypair -alias androiddebugkey \
-            -keypass android -keystore ~/.android/debug.keystore -storepass android \
-            -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -noprompt
+          # chave de teste FIXA (versionada em ci/): assim cada APK novo instala por cima do anterior
+          cp ci/debug.keystore ~/.android/debug.keystore
           MAJOR_MINOR=$(echo $GODOT_VERSION | cut -d. -f1,2)
           cat > ~/.config/godot/editor_settings-${MAJOR_MINOR}.tres <<EOF
           [gd_resource type="EditorSettings" format=3]
@@ -103,12 +102,13 @@ jobs:
 
       - name: APK de teste (anúncios de TESTE do Google)
         env:
-          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: /home/runner/.android/debug.keystore
-          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
-          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+          # build otimizado (pequeno), assinado com a chave de teste FIXA para atualizar por cima
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.android/debug.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
         run: |
           mkdir -p build
-          godot --headless --install-android-build-template --export-debug "Android" build/lanche-em-panico.apk
+          godot --headless --install-android-build-template --export-release "Android" build/lanche-em-panico.apk
           ls -lh build/
           test -f build/lanche-em-panico.apk
           APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | sort -V | tail -1)

@@ -3,7 +3,7 @@ extends Node
 # - Pede consentimento (GDPR/UMP) antes de iniciar o SDK.
 # - Intersticial "A cada fase": entre os dias, com limite de frequência.
 # - Premiado "Recompensa": o jogador escolhe assistir para ganhar moedas.
-# Em builds de DEBUG usa os IDs de teste do Google (nunca clique nos seus anúncios reais!).
+# No APK de teste usa os IDs de teste do Google (nunca clique nos seus anúncios reais!).
 # Fora do Android tudo vira no-op, então o jogo roda normal no PC e nos testes.
 
 signal rewarded_ready_changed(ready: bool)
@@ -37,12 +37,17 @@ func _ready() -> void:
 		_request_consent()
 
 
+# APK de teste (feature "test_ads") e builds de debug usam os anúncios de teste do Google.
+func use_test_ads() -> bool:
+	return OS.is_debug_build() or OS.has_feature("test_ads")
+
+
 func _inter_id() -> String:
-	return TEST_INTERSTITIAL_ID if OS.is_debug_build() else INTERSTITIAL_ID
+	return TEST_INTERSTITIAL_ID if use_test_ads() else INTERSTITIAL_ID
 
 
 func _reward_id() -> String:
-	return TEST_REWARDED_ID if OS.is_debug_build() else REWARDED_ID
+	return TEST_REWARDED_ID if use_test_ads() else REWARDED_ID
 
 
 # ------------------------------------------------------------------ consentimento + init

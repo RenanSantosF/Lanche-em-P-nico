@@ -43,7 +43,7 @@ func _init() -> void:
 	check(R.seat_count({}) == 2 and R.seat_count(maxed) == 4, "bancos 2 -> 4")
 	check(R.grill_slots({}) == 2 and R.grill_slots(maxed) == 4, "chapa 2 -> 4")
 	check(R.cook_time(maxed) < R.cook_time({}), "chapa turbo cozinha mais rápido")
-	check(R.cook_time({}) > 7.0 and R.BURN_AFTER == 6.0, "carne demora um pouco mais; tempo de queimar igual")
+	check(R.cook_time({}) >= 9.0 and R.BURN_AFTER == 6.0, "carne demora um pouco mais; tempo de queimar igual")
 	check(not R.cheese_ok([R.BUN_BOTTOM, R.CHEESE, R.PATTY, R.BUN_TOP]), "cheddar sem carne embaixo é inválido")
 	check(R.next_tier(maxed, R.upgrade_by_id("speed")).is_empty(), "upgrade no máximo não vende mais")
 	check(R.next_tier({}, R.upgrade_by_id("speed"))["level"] == 3, "chapa turbo exige nível 3")

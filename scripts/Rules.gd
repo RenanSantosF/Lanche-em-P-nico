@@ -67,7 +67,7 @@ const TITLES := ["Aprendiz", "Ajudante", "Chapeiro", "Cozinheiro", "Chef", "Chef
 	"Mestre do Lanche", "Grão-Mestre", "Lenda do Lanche"]
 
 # Chapa
-const BASE_COOK := 7.5
+const BASE_COOK := 9.0
 const MELT_TIME := 2.0  # cheddar derretendo em cima da carne, na chapa
 const BURN_AFTER := 6.0
 const FRY_TIME := 5.0

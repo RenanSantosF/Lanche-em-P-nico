@@ -5,3 +5,4 @@ android/
 addons/admob/downloads/
 *.jks
 *.keystore
+!ci/debug.keystore
