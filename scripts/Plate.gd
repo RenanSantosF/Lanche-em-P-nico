@@ -61,11 +61,11 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	# acompanhamentos ao lado do prato
-	var slots := [[R.FRIES, Vector2(cx - pw * 0.5 - 6, plate_y - 40)], [R.SODA, Vector2(cx + pw * 0.5 + 6, plate_y - 44)]]
+	var slots := [[R.FRIES, Vector2(cx - pw * 0.4, plate_y - 30)], [R.SODA, Vector2(cx + pw * 0.4, plate_y - 34)]]
 	for s in slots:
 		if sides.has(s[0]):
 			var sc := 1.0 + _side_pop * 0.3
-			D.draw_side(self, s[0], s[1], 78.0 * sc)
+			D.draw_side(self, s[0], s[1], 70.0 * sc)
 
 
 func _set_drop(v: float) -> void:

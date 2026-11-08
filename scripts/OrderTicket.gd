@@ -20,9 +20,17 @@ func show_order(rec: Dictionary, sd: Array, b: Array, bs: Array) -> void:
 	queue_redraw()
 
 
+var _acc: float = 0.0
+
+
 func _process(delta: float) -> void:
 	_t += delta
-	queue_redraw()
+	# só pisca a linha "próxima" no modo Fácil, e a ~10 quadros/s
+	if Game.easy and not recipe.is_empty():
+		_acc += delta
+		if _acc > 0.1:
+			_acc = 0.0
+			queue_redraw()
 
 
 func _draw() -> void:
@@ -52,14 +60,16 @@ func _draw() -> void:
 	# de cima (último) para baixo (primeiro)
 	for k in range(layers.size() - 1, -1, -1):
 		var state := 0  # 0 pendente, 1 ok, 2 errado, 3 próximo
-		if k < built.size():
+		if not Game.easy:
+			pass
+		elif k < built.size():
 			state = 1 if built[k] == layers[k] else 2
 		elif k == next_idx and prefix_ok:
 			state = 3
 		_row(layers[k], y, row_h, font_size, state)
 		y += row_h
 	for s in sides:
-		_row(s, y, row_h, font_size, 1 if built_sides.has(s) else 0)
+		_row(s, y, row_h, font_size, 1 if (Game.easy and built_sides.has(s)) else 0)
 		y += row_h
 
 

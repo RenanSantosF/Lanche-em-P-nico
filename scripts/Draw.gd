@@ -305,3 +305,19 @@ static func text(ci: CanvasItem, font: Font, pos: Vector2, s: String, size: int,
 	if outline_size > 0:
 		ci.draw_string_outline(font, pos, s, align, width, size, outline_size, outline_color)
 	ci.draw_string(font, pos, s, align, width, size, color)
+
+
+static func flame_points(base: Vector2, s: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in 13:
+		var a := PI * i / 12.0
+		pts.append(base + Vector2(cos(a) * s * 0.6, sin(a) * s * 0.55 - s * 0.4))
+	pts.append(base + Vector2(-s * 0.2, -s * 1.3))
+	pts.append(base + Vector2(s * 0.15, -s * 0.9))
+	pts.append(base + Vector2(s * 0.45, -s * 1.5))
+	return pts
+
+
+static func draw_flame(ci: CanvasItem, base: Vector2, s: float) -> void:
+	ci.draw_colored_polygon(flame_points(base, s), Color("ff6b1a"))
+	ci.draw_colored_polygon(flame_points(base + Vector2(0, -s * 0.05), s * 0.55), Color("ffd43b"))
