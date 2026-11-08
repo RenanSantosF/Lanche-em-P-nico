@@ -21,20 +21,15 @@ func _ready() -> void:
 		add_child(p)
 		players.append(p)
 	music = AudioStreamPlayer.new()
-	music.stream = _looped(load("res://audio/music.wav"))
+	# o loop é definido na importação (audio/*.wav.import: edit/loop_mode=2).
+	# Mudar loop_end em tempo de execução lia além do fim do áudio no Godot 4.7 e travava o app.
+	music.stream = load("res://audio/music.wav")
 	music.volume_db = -9.0
 	add_child(music)
 	grill = AudioStreamPlayer.new()
-	grill.stream = _looped(load("res://audio/grill_loop.wav"))
+	grill.stream = load("res://audio/grill_loop.wav")
 	grill.volume_db = -14.0
 	add_child(grill)
-
-
-func _looped(w: AudioStreamWAV) -> AudioStreamWAV:
-	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	w.loop_begin = 0
-	w.loop_end = int(w.get_length() * w.mix_rate)
-	return w
 
 
 func play(snd: String, pitch: float = 1.0, vol_db: float = 0.0) -> void:

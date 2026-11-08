@@ -94,7 +94,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu angle_indirect -no-boot-anim -camera-back none
           script: bash ci/emulator_play.sh
 
       - name: Publicar diagnóstico

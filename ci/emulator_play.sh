@@ -6,6 +6,8 @@ PKG=${PKG:-com.ferreiratecnologia.lancheempanico}
 mkdir -p diag
 adb wait-for-device
 adb shell settings put global window_animation_scale 0 || true
+# não mostrar o aviso "Viewing full screen" (ele cobre a tela e rouba os toques)
+adb shell settings put secure immersive_mode_confirmations confirmed || true
 adb install -r build/emu.apk
 adb logcat -c
 
@@ -89,6 +91,7 @@ shot 10_fim
 
 adb logcat -d > diag/logcat.txt
 echo "=== trechos importantes do logcat ==="
-grep -E "FATAL|AndroidRuntime|SIGSEGV|SIGABRT|backtrace|Abort message|godot.*(ERROR|SCRIPT)|E godot|USER ERROR|\[LP\]|Ads" diag/logcat.txt | head -120 || true
+echo "toques duplicados ignorados: $(grep -c 'toque duplicado' diag/logcat.txt)"
+grep -E "FATAL|SIGSEGV|SIGABRT|backtrace|Abort message|godot.*(ERROR|SCRIPT)|E godot|USER ERROR|\[LP\]|Ads" diag/logcat.txt | head -120 || true
 echo "=== fim ==="
 exit 0
