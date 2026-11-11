@@ -30,7 +30,7 @@ class Painter extends Control:
 				GL.draw_mascot(self, size / 2 + Vector2(0, w * 0.02), w * 0.36, 0.6)
 			"play_icon":
 				GL.draw_scene(self, size / 2, w, 0.6, false, true)
-			"feature":
+			"feature", "feature_en":
 				draw_rect(Rect2(0, 0, w, h), Color("ff5d2a"))
 				GL.draw_sunburst(self, Vector2(w * 0.24, h * 0.55), w * 0.6, 0.3, Color("ffb703"), Color("ff8c1a"), 24)
 				D.draw_side(self, R.FRIES, Vector2(w * 0.09, h * 0.66), h * 0.32)
@@ -39,9 +39,9 @@ class Painter extends Control:
 				var fv2 := FontVariation.new()
 				fv2.base_font = ThemeDB.fallback_font
 				fv2.variation_embolden = 0.9
-				D.text(self, fv2, Vector2(w * 0.47, h * 0.42), "LANCHE", int(h * 0.2), Color("ffd21f"), HORIZONTAL_ALIGNMENT_CENTER, w * 0.5, int(h * 0.05), Color("5c2c0c"))
-				D.text(self, fv2, Vector2(w * 0.47, h * 0.66), "EM PÂNICO!", int(h * 0.16), Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, w * 0.5, int(h * 0.05), Color("5c2c0c"))
-				D.text(self, fv2, Vector2(w * 0.47, h * 0.84), "Monte, sirva e expanda!", int(h * 0.065), Color("fff3bf"), HORIZONTAL_ALIGNMENT_CENTER, w * 0.5, int(h * 0.02), Color("5c2c0c"))
+				D.text(self, fv2, Vector2(w * 0.47, h * 0.42), ("BURGER" if job == "feature_en" else "LANCHE"), int(h * 0.2), Color("ffd21f"), HORIZONTAL_ALIGNMENT_CENTER, w * 0.5, int(h * 0.05), Color("5c2c0c"))
+				D.text(self, fv2, Vector2(w * 0.47, h * 0.66), ("PANIC!" if job == "feature_en" else "EM PÂNICO!"), int(h * 0.16), Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, w * 0.5, int(h * 0.05), Color("5c2c0c"))
+				D.text(self, fv2, Vector2(w * 0.47, h * 0.84), ("Build, serve and expand!" if job == "feature_en" else "Monte, sirva e expanda!"), int(h * 0.065), Color("fff3bf"), HORIZONTAL_ALIGNMENT_CENTER, w * 0.5, int(h * 0.02), Color("5c2c0c"))
 			"game_logo":
 				GL.draw_scene(self, Vector2(w / 2, h * 0.4), w * 0.8, 0.6, true, true)
 				var fv := FontVariation.new()
@@ -60,6 +60,7 @@ var jobs := [
 	["game_logo", Vector2i(1024, 1024), "res://game_logo.png", true],
 	["play_icon", Vector2i(512, 512), "res://store/play_icon_512.png", false],
 	["feature", Vector2i(1024, 500), "res://store/feature_graphic_1024x500.png", false],
+	["feature_en", Vector2i(1024, 500), "res://store/feature_graphic_1024x500_en.png", false],
 ]
 var vps := []
 var frame := 0
