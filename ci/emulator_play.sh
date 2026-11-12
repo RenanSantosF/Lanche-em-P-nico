@@ -92,8 +92,7 @@ for i in 1 2 3 4 5 6; do
   alive "jogando $i"
 done
 shot 09_jogando
-# a abertura FT (1,8 s) conta quadros; no emulador sem GPU (~4 fps) ela dura bem mais
-sleep 45
+sleep 20
 alive "fim"
 shot 10_fim
 
