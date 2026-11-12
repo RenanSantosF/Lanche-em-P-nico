@@ -100,6 +100,16 @@ jobs:
           echo "VERSION_CODE=${CODE}" >> $GITHUB_ENV
           grep -n "version/" export_presets.cfg
 
+      - name: Template Android (Gradle) + ajustes da Play Console
+        run: |
+          rm -rf android
+          mkdir -p android/build
+          unzip -q ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d android/build
+          echo -n "${GODOT_VERSION}.stable" > android/.build_version
+          touch android/build/.gdignore
+          # APIs de ponta a ponta descontinuadas no Android 15 (aviso da Play Console)
+          bash ci/android_play_compat.sh android/build
+
       - name: APK de teste (anúncios de TESTE do Google)
         env:
           # build otimizado (pequeno), assinado com a chave de teste FIXA para atualizar por cima
@@ -108,7 +118,7 @@ jobs:
           GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
         run: |
           mkdir -p build
-          godot --headless --install-android-build-template --export-release "Android" build/lanche-em-panico.apk
+          godot --headless --export-release "Android" build/lanche-em-panico.apk
           ls -lh build/
           test -f build/lanche-em-panico.apk
           APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | sort -V | tail -1)

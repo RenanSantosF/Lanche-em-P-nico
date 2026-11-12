@@ -21,16 +21,18 @@ config/name_localized={
 "pt": "Lanche em Pânico"
 }
 config/description="Monte os lanches do jeito que o cliente pediu, ganhe estrelas e expanda sua lanchonete!"
-run/main_scene="res://ft_intro/FTIntro.tscn"
+run/main_scene="res://scenes/Main.tscn"
 config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "GL Compatibility")
 run/max_fps=60
-boot_splash/bg_color=Color(0.0784314, 0.0313726, 0.180392, 1)
+boot_splash/bg_color=Color(1, 0.886, 0.498, 1)
 boot_splash/show_image=false
 config/icon="res://icon.png"
 
 [autoload]
 
+FTSplash="*res://addons/ft_splash/ft_splash.gd"
+ScreenFit="*res://addons/play_compat/screen_fit.gd"
 Game="*res://autoload/Game.gd"
 L="*res://autoload/L.gd"
 Sfx="*res://autoload/Sfx.gd"
@@ -44,7 +46,7 @@ window/size/window_width_override=405
 window/size/window_height_override=720
 window/stretch/mode="viewport"
 window/stretch/aspect="expand"
-window/handheld/orientation=1
+window/handheld/orientation=6
 
 [editor_plugins]
 
