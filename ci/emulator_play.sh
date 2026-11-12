@@ -31,7 +31,8 @@ alive() {
 }
 
 adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 > /dev/null
-sleep 20
+# a abertura FT (1,8 s) conta quadros; no emulador sem GPU (~4 fps) ela dura bem mais
+sleep 45
 alive "abertura"
 shot 01_inicio
 
@@ -91,7 +92,8 @@ for i in 1 2 3 4 5 6; do
   alive "jogando $i"
 done
 shot 09_jogando
-sleep 20
+# a abertura FT (1,8 s) conta quadros; no emulador sem GPU (~4 fps) ela dura bem mais
+sleep 45
 alive "fim"
 shot 10_fim
 
