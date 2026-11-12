@@ -156,7 +156,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publicar Release com link direto (branch principal)
-        if: github.ref_name == github.event.repository.default_branch
+        if: github.ref_name == github.event.repository.default_branch || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -166,4 +166,6 @@ jobs:
             NOTES="$NOTES
           AAB para enviar à Play Store (anúncios reais): lanche-em-panico.aab"
           fi
-          gh release create "$TAG" build/* --title "Lanche em Pânico ${VERSION_NAME} (build ${VERSION_CODE})" --notes "$NOTES" --latest
+          LATEST="--latest"
+          if [ "$GITHUB_REF_NAME" != "${{ github.event.repository.default_branch }}" ]; then LATEST="--prerelease"; fi
+          gh release create "$TAG" build/* --target "$GITHUB_SHA" --title "Lanche em Pânico ${VERSION_NAME} (build ${VERSION_CODE})" --notes "$NOTES" $LATEST
