@@ -77,7 +77,13 @@ jobs:
         run: |
           sed -i '0,/architectures\/x86_64=false/s//architectures\/x86_64=true/' export_presets.cfg
           mkdir -p build
-          godot --headless --install-android-build-template --export-release "Android" build/emu.apk
+          # mesmo template do build da loja (GodotApp ajustado + R8), para testar o que vai para a Play
+          rm -rf android && mkdir -p android/build
+          unzip -q ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d android/build
+          echo -n "${GODOT_VERSION}.stable" > android/.build_version
+          touch android/build/.gdignore
+          bash ci/android_play_compat.sh android/build
+          godot --headless --export-release "Android" build/emu.apk
           ls -lh build/
 
       - name: Habilitar KVM

@@ -31,7 +31,8 @@ alive() {
 }
 
 adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 > /dev/null
-sleep 20
+# a abertura FT (1,8 s) conta quadros; no emulador sem GPU (~4 fps) ela dura bem mais
+sleep 45
 alive "abertura"
 shot 01_inicio
 
