@@ -1595,6 +1595,7 @@ func _end_day() -> void:
 	Game.best_combo = maxi(Game.best_combo, stats["best_combo"])
 	var finished_day := Game.day
 	Game.day_best[finished_day] = maxi(int(Game.day_best.get(finished_day, 0)), day_stars)
+	Telemetry.level(finished_day, day_stars >= 1, earned)
 	if day_stars >= 1:
 		Game.day += 1
 	Game.save_game()

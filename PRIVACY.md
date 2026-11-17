@@ -1,6 +1,6 @@
 # Lanche em Pânico — Política de Privacidade / Privacy Policy / Política de Privacidad
 
-Última atualização / Last updated / Última actualización: 2026-11-08 · Desenvolvedor / Developer: Ferreira Tecnologia (FT)
+Última atualização / Last updated / Última actualización: 2026-11-17 · Desenvolvedor / Developer: Ferreira Tecnologia (FT)
 
 [Português](#português) · [English](#english) · [Español](#español)
 
@@ -10,7 +10,10 @@
 
 ### Dados que o jogo guarda
 
-O progresso do jogo (moedas, dia, nível, compras, idioma e configurações de som) fica salvo **somente no seu aparelho**. Nós não temos servidores e não recebemos esses dados. Não pedimos nome, e-mail, conta, fotos, contatos ou localização.
+O progresso do jogo (moedas, dia, nível, compras, idioma e configurações de som) fica salvo **somente no seu aparelho**. Nós não recebemos esses dados. Não pedimos nome, e-mail, conta, fotos, contatos ou localização.
+
+### Estatísticas de uso anônimas
+Para sabermos quantas pessoas jogam, em que horários, por quanto tempo e se voltam a jogar, o jogo envia ao nosso servidor dados de uso anônimos: um código aleatório criado no próprio aparelho (não é o ID de publicidade e não identifica você), o início e a duração de cada sessão, as fases ou partidas concluídas com a pontuação, a versão do jogo, o sistema e o idioma do aparelho. Não enviamos nome, e-mail, contatos, fotos, localização nem o ID de publicidade. Esses dados servem apenas para melhorar os jogos, não são vendidos nem compartilhados. Para apagar o código, desinstale o jogo ou limpe os dados do app (um código novo é criado).
 
 ### Anúncios (Google AdMob)
 
@@ -24,7 +27,7 @@ O jogo não coleta, por conta própria, dados pessoais de ninguém, incluindo cr
 
 ### Seus direitos e contato
 
-Como não guardamos seus dados em servidores, para apagar o progresso basta desinstalar o jogo ou limpar os dados do app. Dúvidas: use o e-mail de suporte informado na página do jogo na Google Play.
+Como não guardamos dados pessoais em servidores (só as estatísticas anônimas acima), para apagar o progresso basta desinstalar o jogo ou limpar os dados do app. Dúvidas: use o e-mail de suporte informado na página do jogo na Google Play.
 
 ## English
 
@@ -32,7 +35,10 @@ Como não guardamos seus dados em servidores, para apagar o progresso basta desi
 
 ### Data stored by the game
 
-Game progress (coins, day, level, purchases, language and sound settings) is saved **only on your device**. We have no servers and do not receive this data. We do not ask for your name, email, account, photos, contacts or location.
+Game progress (coins, day, level, purchases, language and sound settings) is saved **only on your device**. We do not receive this data. We do not ask for your name, email, account, photos, contacts or location.
+
+### Anonymous usage statistics
+To learn how many people play, at what times, for how long and whether they come back, the game sends anonymous usage data to our server: a random code created on the device (it is not the advertising ID and does not identify you), the start and length of each session, completed levels or games with the score, the game version, and the device's operating system and language. We do not send your name, email, contacts, photos, location or advertising ID. This data is used only to improve our games and is not sold or shared. To erase the code, uninstall the game or clear the app's data (a new code is created).
 
 ### Ads (Google AdMob)
 
@@ -46,7 +52,7 @@ The game itself does not collect personal data from anyone, including children. 
 
 ### Your rights and contact
 
-Since we keep no data on servers, you can erase your progress by uninstalling the game or clearing the app's data. Questions: use the support email shown on the game's Google Play page.
+Since we keep no personal data on servers (only the anonymous statistics above), you can erase your progress by uninstalling the game or clearing the app's data. Questions: use the support email shown on the game's Google Play page.
 
 ## Español
 
@@ -54,7 +60,10 @@ Since we keep no data on servers, you can erase your progress by uninstalling th
 
 ### Datos que guarda el juego
 
-El progreso (monedas, día, nivel, compras, idioma y ajustes de sonido) se guarda **solo en tu dispositivo**. No tenemos servidores y no recibimos estos datos. No pedimos nombre, correo, cuenta, fotos, contactos ni ubicación.
+El progreso (monedas, día, nivel, compras, idioma y ajustes de sonido) se guarda **solo en tu dispositivo**. No recibimos estos datos. No pedimos nombre, correo, cuenta, fotos, contactos ni ubicación.
+
+### Estadísticas de uso anónimas
+Para saber cuántas personas juegan, a qué horas, cuánto tiempo y si vuelven a jugar, el juego envía a nuestro servidor datos de uso anónimos: un código aleatorio creado en el propio dispositivo (no es el ID de publicidad y no te identifica), el inicio y la duración de cada sesión, los niveles o partidas terminados con la puntuación, la versión del juego, y el sistema y el idioma del dispositivo. No enviamos nombre, correo, contactos, fotos, ubicación ni el ID de publicidad. Estos datos se usan solo para mejorar los juegos y no se venden ni se comparten. Para borrar el código, desinstala el juego o borra los datos de la app (se crea un código nuevo).
 
 ### Anuncios (Google AdMob)
 
@@ -68,4 +77,4 @@ El juego por sí mismo no recopila datos personales de nadie, incluidos los niñ
 
 ### Tus derechos y contacto
 
-Como no guardamos datos en servidores, puedes borrar tu progreso desinstalando el juego o borrando los datos de la app. Dudas: usa el correo de soporte indicado en la página del juego en Google Play.
+Como no guardamos datos personales en servidores (solo las estadísticas anónimas de arriba), puedes borrar tu progreso desinstalando el juego o borrando los datos de la app. Dudas: usa el correo de soporte indicado en la página del juego en Google Play.

@@ -15,6 +15,7 @@ general/android/app_id="ca-app-pub-4311255826061303~4157782489"
 [application]
 
 config/name="Lanche em Pânico"
+config/version="3.3.0"
 config/name_localized={
 "en": "Burger Panic",
 "es": "Pánico Burger",
@@ -35,6 +36,7 @@ Game="*res://autoload/Game.gd"
 L="*res://autoload/L.gd"
 Sfx="*res://autoload/Sfx.gd"
 Ads="*res://autoload/Ads.gd"
+Telemetry="*res://autoload/telemetry.gd"
 
 [display]
 
